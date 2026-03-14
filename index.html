@@ -658,19 +658,14 @@ async function doLogin() {
   if (!email || !pass) { showErr(err, 'Preencha e-mail e senha'); return; }
   const btn = document.querySelector('#auth-screen .btn-primary');
   btn.textContent = 'Entrando...'; btn.disabled = true;
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  btn.textContent = 'Entrar no sistema'; btn.disabled = false;
-  if (error) { showErr(err, 'E-mail ou senha incorretos: ' + error.message); return; }
-  await initApp(data.user);
-}
-  const email = document.getElementById('login-email').value;
-  const pass = document.getElementById('login-pass').value;
-  const err = document.getElementById('auth-err');
-  err.style.display = 'none';
-  if (!email || !pass) { showErr(err, 'Preencha e-mail e senha'); return; }
-  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-  if (error) { showErr(err, 'E-mail ou senha incorretos'); return; }
-  await initApp(data.user);
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) throw error;
+    await initApp(data.user);
+  } catch(e) {
+    showErr(err, 'Erro ao entrar: ' + e.message);
+    btn.textContent = 'Entrar no sistema'; btn.disabled = false;
+  }
 }
 
 async function doRegister() {
