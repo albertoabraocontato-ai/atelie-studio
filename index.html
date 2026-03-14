@@ -651,6 +651,18 @@ let editCliente = null, editEstoque = null, editPedidoId = null;
 
 // ===== AUTH =====
 async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('auth-err');
+  err.style.display = 'none';
+  if (!email || !pass) { showErr(err, 'Preencha e-mail e senha'); return; }
+  const btn = document.querySelector('#auth-screen .btn-primary');
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.textContent = 'Entrar no sistema'; btn.disabled = false;
+  if (error) { showErr(err, 'E-mail ou senha incorretos: ' + error.message); return; }
+  await initApp(data.user);
+}
   const email = document.getElementById('login-email').value;
   const pass = document.getElementById('login-pass').value;
   const err = document.getElementById('auth-err');
