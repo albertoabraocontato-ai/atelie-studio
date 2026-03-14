@@ -846,7 +846,7 @@ function renderPedidos(list) {
       <td>${fmtDate(p.data_pedido)}</td>
       <td>${fmtDate(p.prazo_entrega)}</td>
       <td>${fmt(total)}</td>
-      <td style="color:${saldo>0?'var(--r)':'var(--forest)';font-weight:500}">${fmt(saldo)}</td>
+      <td style="font-weight:600;color:${saldo>0?'#D63B2F':'#2D5A27'}">${fmt(saldo)}</td>
       <td><span class="status ${statusClass[p.status]||''}">${statusLabels[p.status]||p.status}</span></td>
       <td style="white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="editarPedido('${p.id}')" style="margin-right:4px">✏️</button>
@@ -927,7 +927,7 @@ function renderFinanceiro() {
       <td>${f.pedidos?.clientes?.razao_social||'—'}</td>
       <td>${fmt(f.valor_total)}</td><td>${fmt(f.valor_entrada)}</td>
       <td>${f.forma_pagamento||'—'}</td>
-      <td style="color:${saldo>0?'var(--r)':'var(--forest)';font-weight:500}">${fmt(saldo)}</td>
+      <td style="font-weight:600;color:${saldo>0?'#D63B2F':'#2D5A27'}">${fmt(saldo)}</td>
       <td>${fmt(f.custo_total)}</td>
       <td style="color:var(--forest)">${fmt(Math.max(0,lucro))}</td>
       <td>${margem}%</td>
