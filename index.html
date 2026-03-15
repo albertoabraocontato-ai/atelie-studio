@@ -38,6 +38,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .btn-ghost{background:transparent;color:var(--brown);border:1px solid var(--tan)}
 .btn-ghost:hover{background:var(--tan)}
 .btn-danger{background:#fef0ef;color:#8b2020;border:1px solid #f5bfbf}
+.btn-danger:hover{background:#f5bfbf}
 .auth-err{background:#fef0ef;color:#8b2020;border:1px solid #f5bfbf;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
 
 /* SIDEBAR */
@@ -195,6 +196,13 @@ textarea.form-input{resize:vertical;min-height:60px}
 .pdf-row:last-child{border-bottom:none}
 .pdf-lbl{color:var(--kraft)}.pdf-val{font-weight:500;color:var(--dark)}
 .pdf-item-row{background:rgba(61,43,26,.05);border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:11px;display:flex;justify-content:space-between}
+
+/* CONFIRM MODAL */
+.confirm-box{background:white;border-radius:16px;width:100%;max-width:420px;border:1px solid var(--tan);padding:28px}
+.confirm-icon{font-size:36px;text-align:center;margin-bottom:12px}
+.confirm-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--dark);text-align:center;margin-bottom:8px}
+.confirm-desc{font-size:13px;color:var(--brown);text-align:center;margin-bottom:24px;line-height:1.5}
+.confirm-actions{display:flex;gap:10px;justify-content:center}
 
 /* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:white;padding:12px 18px;border-radius:10px;font-size:13px;z-index:300;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
@@ -635,6 +643,19 @@ textarea.form-input{resize:vertical;min-height:60px}
   </div>
 </div>
 
+<!-- MODAL CONFIRMAR EXCLUSÃO -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">Excluir pedido?</div>
+    <div class="confirm-desc" id="confirm-desc">Esta ação é permanente e não pode ser desfeita. Todos os itens, entregas e registros financeiros deste pedido serão apagados.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeModal('confirm-modal')">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarExclusao()" style="background:var(--r);color:white;border:none">Sim, excluir</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -648,6 +669,7 @@ let currentUser = null, empresaId = null;
 let allPedidos = [], allClientes = [], allEstoque = [], allEntregas = [], allFin = [];
 let itemCount = 0, entregaFormCount = 0;
 let editCliente = null, editEstoque = null, editPedidoId = null;
+let pedidoParaExcluir = null; // FIX: variável para exclusão
 
 // ===== AUTH =====
 async function doLogin() {
@@ -777,7 +799,6 @@ function renderDashboard() {
   document.getElementById('m-ent').textContent = entSemana;
   document.getElementById('m-ent-sub').textContent = 'entregas nos próximos 7 dias';
 
-  // alerts
   const alerts = [];
   const atrasados = allPedidos.filter(p=>p.prazo_entrega&&new Date(p.prazo_entrega)<hoje&&p.status!=='finalizado'&&p.status!=='cancelado');
   if (atrasados.length) alerts.push(`<div class="alert-pill ap-danger"><div class="dot"></div>${atrasados.length} pedido(s) atrasado(s)</div>`);
@@ -793,7 +814,6 @@ function renderDashboard() {
   document.getElementById('badge-pedidos').style.display = atrasados.length ? 'inline' : 'none';
   document.getElementById('badge-estoque').style.display = baixo.length ? 'inline' : 'none';
 
-  // pedidos recentes
   const recentes = allPedidos.slice(0, 5);
   document.getElementById('dash-pedidos-list').innerHTML = recentes.length ? `<div style="padding:4px 18px">${recentes.map(p=>`
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--tan)">
@@ -805,7 +825,6 @@ function renderDashboard() {
       <span class="status ${statusClass[p.status]||''}">${statusLabels[p.status]||p.status}</span>
     </div>`).join('')}</div>` : '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido ainda</div></div>';
 
-  // estoque rápido
   document.getElementById('dash-estoque-list').innerHTML = allEstoque.length ? `<div style="padding:4px 18px">${allEstoque.slice(0,5).map(e=>{
     const pct = e.estoque_minimo > 0 ? Math.min(100, (e.quantidade/e.estoque_minimo)*50) : 80;
     const cls = e.quantidade <= e.estoque_minimo ? (e.quantidade === 0 ? 'bar-crit' : 'bar-low') : 'bar-ok';
@@ -815,13 +834,11 @@ function renderDashboard() {
       <div class="stock-bar-wrap"><div class="stock-bar ${cls}" style="width:${Math.max(8,pct)}%"></div></div>
     </div>`;}).join('')}</div>` : '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-text">Nenhum material cadastrado</div></div>';
 
-  // próximas entregas
   const proximas = allEntregas.filter(e=>e.status==='pendente').slice(0,5);
   document.getElementById('dash-entregas-list').innerHTML = proximas.length ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Qtd</th></tr></thead><tbody>${
     proximas.map(e=>`<tr><td>${fmtDate(e.data_prevista)}</td><td style="color:var(--terra);font-weight:600">#${String(e.pedidos?.numero||0).padStart(4,'0')}</td><td>${e.pedidos?.clientes?.razao_social||'—'}</td><td>${e.quantidade}</td></tr>`).join('')
   }</tbody></table></div>` : '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Sem entregas pendentes</div></div>';
 
-  // fin resumo
   const totFat = allFin.reduce((s,f)=>s+(f.valor_total||0),0);
   const totRec = allFin.reduce((s,f)=>s+(f.valor_entrada||0),0);
   const totPend = totFat - totRec;
@@ -849,11 +866,40 @@ function renderPedidos(list) {
       <td style="font-weight:600;color:${saldo>0?'#D63B2F':'#2D5A27'}">${fmt(saldo)}</td>
       <td><span class="status ${statusClass[p.status]||''}">${statusLabels[p.status]||p.status}</span></td>
       <td style="white-space:nowrap">
-        <button class="btn btn-ghost btn-sm" onclick="editarPedido('${p.id}')" style="margin-right:4px">✏️</button>
-        <button class="btn btn-ghost btn-sm" onclick="gerarPDFPedido('${p.id}')">📄</button>
+        <button class="btn btn-ghost btn-sm" onclick="editarPedido('${p.id}')" style="margin-right:4px" title="Editar">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="gerarPDFPedido('${p.id}')" style="margin-right:4px" title="PDF">📄</button>
+        <button class="btn btn-ghost btn-sm" onclick="solicitarExclusao('${p.id}','${String(p.numero).padStart(4,'0')}','${(p.clientes?.razao_social||'').replace(/'/g,"\\'")}'')" title="Excluir" style="color:#D63B2F;border-color:#f5bfbf">🗑️</button>
       </td>
     </tr>`;
   }).join('');
+}
+
+// ===== FIX: EXCLUSÃO DE PEDIDO =====
+function solicitarExclusao(id, numero, cliente) {
+  pedidoParaExcluir = id;
+  document.getElementById('confirm-desc').textContent = `Você está prestes a excluir o pedido #${numero} de ${cliente}. Esta ação é permanente e não pode ser desfeita.`;
+  openModal('confirm-modal');
+}
+
+async function confirmarExclusao() {
+  if (!pedidoParaExcluir) return;
+  const btn = document.querySelector('#confirm-modal .btn-danger');
+  btn.textContent = 'Excluindo...'; btn.disabled = true;
+  try {
+    // Apagar registros relacionados primeiro (cascade)
+    await sb.from('itens_pedido').delete().eq('pedido_id', pedidoParaExcluir);
+    await sb.from('entregas').delete().eq('pedido_id', pedidoParaExcluir);
+    await sb.from('financeiro_pedido').delete().eq('pedido_id', pedidoParaExcluir);
+    await sb.from('pedidos').delete().eq('id', pedidoParaExcluir);
+    showToast('Pedido excluído com sucesso!', 'success');
+    closeModal('confirm-modal');
+    pedidoParaExcluir = null;
+    await loadAll();
+  } catch(e) {
+    showToast('Erro ao excluir: ' + e.message, 'error');
+  } finally {
+    btn.textContent = 'Sim, excluir'; btn.disabled = false;
+  }
 }
 
 function renderClientes(list) {
@@ -1036,17 +1082,20 @@ async function salvarPedido() {
   for (let i = 1; i <= itemCount; i++) {
     const modelo = document.getElementById('it-modelo-'+i)?.value;
     if (!modelo) continue;
+    const qtd = parseInt(document.getElementById('it-qtd-'+i)?.value)||0;
+    const preco = parseFloat(document.getElementById('it-preco-'+i)?.value)||0;
     itens.push({
       empresa_id: empresaId,
       modelo, cor: document.getElementById('it-cor-'+i)?.value||'',
       logotipo: document.getElementById('it-logo-'+i)?.value||'',
-      quantidade: parseInt(document.getElementById('it-qtd-'+i)?.value)||0,
-      valor_unitario: parseFloat(document.getElementById('it-preco-'+i)?.value)||0,
+      quantidade: qtd,
+      valor_unitario: preco,
+      valor_total: qtd * preco, // FIX: sempre calcular e salvar valor_total
     });
   }
   if (!itens.length) { showToast('Adicione pelo menos um item', 'error'); return; }
 
-  const totalVal = itens.reduce((s,it)=>s+(it.quantidade*it.valor_unitario),0);
+  const totalVal = itens.reduce((s,it)=>s+it.valor_total, 0);
   const pedidoData = {
     empresa_id: empresaId,
     cliente_id: clienteId,
@@ -1132,6 +1181,8 @@ async function editarPedido(id) {
   const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', id);
   (itens||[]).forEach(it => {
     itemCount++;
+    // FIX: calcular valor_total se vier nulo
+    const valorTotal = it.valor_total || (it.quantidade * it.valor_unitario);
     const tr = document.createElement('tr');
     tr.id = 'item-row-'+itemCount;
     tr.innerHTML = `
@@ -1140,7 +1191,7 @@ async function editarPedido(id) {
       <td><input type="text" value="${it.logotipo||''}" id="it-logo-${itemCount}"></td>
       <td><input type="number" value="${it.quantidade}" id="it-qtd-${itemCount}" oninput="calcTotal()" style="width:65px"></td>
       <td><input type="number" step="0.01" value="${it.valor_unitario}" id="it-preco-${itemCount}" oninput="calcTotal()" style="width:80px"></td>
-      <td style="font-weight:500" id="it-total-${itemCount}">${fmt(it.valor_total)}</td>
+      <td style="font-weight:500" id="it-total-${itemCount}">${fmt(valorTotal)}</td>
       <td><button class="remove-item" onclick="removeItem(${itemCount})">×</button></td>`;
     document.getElementById('itens-tbody').appendChild(tr);
   });
@@ -1244,6 +1295,7 @@ async function salvarStatusEntrega() {
 }
 
 // ===== PDF =====
+// FIX: calcular valor_total dos itens inline (qtd * preco) caso o campo venha nulo do banco
 async function loadPdfPreview() {
   const id = document.getElementById('pdf-pedido-select').value;
   if (!id) { document.getElementById('pdf-preview-area').innerHTML = ''; return; }
@@ -1252,7 +1304,17 @@ async function loadPdfPreview() {
   const { data: entregas } = await sb.from('entregas').select('*').eq('pedido_id', id);
   const f = pedido?.financeiro_pedido?.[0];
   const cliente = allClientes.find(c=>c.id===pedido?.cliente_id);
-  const saldo = (f?.valor_total||0) - (f?.valor_entrada||0);
+
+  // FIX: recalcular valor_total de cada item e o total geral a partir dos itens
+  const itensComTotal = (itens||[]).map(it => ({
+    ...it,
+    valor_total_calc: it.valor_total || (it.quantidade * it.valor_unitario)
+  }));
+  const totalCalculado = itensComTotal.reduce((s, it) => s + it.valor_total_calc, 0);
+  // Usar o valor do financeiro_pedido se existir, senão usar o calculado dos itens
+  const valorTotalExibir = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalCalculado;
+  const saldo = valorTotalExibir - (f?.valor_entrada||0);
+
   document.getElementById('pdf-preview-area').innerHTML = `
     <div class="pdf-prev">
       <div class="pdf-logo-row">
@@ -1274,9 +1336,9 @@ async function loadPdfPreview() {
         </div>
       </div>
       <div class="pdf-sec-title">Itens</div>
-      ${(itens||[]).map(it=>`<div class="pdf-item-row"><span><b>${it.modelo}</b> · ${it.cor||''} · ${it.logotipo||''}</span><span>${it.quantidade} × ${fmt(it.valor_unitario)} = ${fmt(it.valor_total)}</span></div>`).join('')}
+      ${itensComTotal.map(it=>`<div class="pdf-item-row"><span><b>${it.modelo}</b> · ${it.cor||''} · ${it.logotipo||''}</span><span>${it.quantidade} × ${fmt(it.valor_unitario)} = ${fmt(it.valor_total_calc)}</span></div>`).join('')}
       ${entregas?.length ? `<div class="pdf-sec-title" style="margin-top:12px">Entregas</div>${entregas.map(e=>`<div class="pdf-row"><span class="pdf-lbl">${fmtDate(e.data_prevista)}</span><span class="pdf-val">${e.quantidade} un — ${e.status}</span></div>`).join('')}` : ''}
-      <div class="fin-total"><span class="fin-total-lbl">Valor total</span><span class="fin-total-val">${fmt(f?.valor_total)}</span></div>
+      <div class="fin-total"><span class="fin-total-lbl">Valor total</span><span class="fin-total-val">${fmt(valorTotalExibir)}</span></div>
       <div class="fin-saldo"><span style="font-size:12px;color:#7a3010;font-weight:500">Entrada paga: ${fmt(f?.valor_entrada)}</span><span style="font-size:14px;color:var(--terra);font-weight:700">Saldo: ${fmt(saldo)}</span></div>
       <div style="margin-top:12px;font-size:10px;color:var(--kraft);line-height:1.6"><b>Termos:</b> Prazo de produção conforme acordado. Entrega condicionada ao pagamento do saldo pendente.</div>
     </div>`;
