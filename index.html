@@ -868,7 +868,7 @@ function renderPedidos(list) {
       <td style="white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="editarPedido('${p.id}')" style="margin-right:4px" title="Editar">✏️</button>
         <button class="btn btn-ghost btn-sm" onclick="gerarPDFPedido('${p.id}')" style="margin-right:4px" title="PDF">📄</button>
-        <button class="btn btn-ghost btn-sm" onclick="solicitarExclusao('${p.id}','${String(p.numero).padStart(4,'0')}','${(p.clientes?.razao_social||'').replace(/'/g,"\\'")}'')" title="Excluir" style="color:#D63B2F;border-color:#f5bfbf">🗑️</button>
+        <button class="btn btn-ghost btn-sm" onclick="solicitarExclusao('${p.id}','${String(p.numero).padStart(4,'0')}','${(p.clientes?.razao_social||'').replace(/'/g,' ')}')" title="Excluir" style="color:#D63B2F;border-color:#f5bfbf">🗑️</button>
       </td>
     </tr>`;
   }).join('');
