@@ -1080,22 +1080,26 @@ async function salvarPedido() {
 
   const itens = [];
   for (let i = 1; i <= itemCount; i++) {
-    const modelo = document.getElementById('it-modelo-'+i)?.value;
+    const modeloEl = document.getElementById('it-modelo-'+i);
+    if (!modeloEl) continue;
+    const modelo = modeloEl.value.trim();
     if (!modelo) continue;
-    const qtd = parseInt(document.getElementById('it-qtd-'+i)?.value)||0;
+    const qtd = parseFloat(document.getElementById('it-qtd-'+i)?.value)||0;
     const preco = parseFloat(document.getElementById('it-preco-'+i)?.value)||0;
     itens.push({
       empresa_id: empresaId,
-      modelo, cor: document.getElementById('it-cor-'+i)?.value||'',
+      modelo,
+      cor: document.getElementById('it-cor-'+i)?.value||'',
       logotipo: document.getElementById('it-logo-'+i)?.value||'',
       quantidade: qtd,
       valor_unitario: preco,
-      valor_total: qtd * preco, // FIX: sempre calcular e salvar valor_total
+      valor_total: qtd * preco,
     });
   }
   if (!itens.length) { showToast('Adicione pelo menos um item', 'error'); return; }
 
   const totalVal = itens.reduce((s,it)=>s+it.valor_total, 0);
+
   const pedidoData = {
     empresa_id: empresaId,
     cliente_id: clienteId,
@@ -1105,39 +1109,77 @@ async function salvarPedido() {
     observacoes: document.getElementById('p-obs').value,
   };
 
-  let pedidoId = editPedidoId;
-  if (editPedidoId) {
-    await sb.from('pedidos').update(pedidoData).eq('id', editPedidoId);
-    await sb.from('itens_pedido').delete().eq('pedido_id', editPedidoId);
-  } else {
-    const { data } = await sb.from('pedidos').insert(pedidoData).select().single();
-    pedidoId = data?.id;
+  const btnSalvar = document.getElementById('btn-salvar-pedido');
+  btnSalvar.textContent = 'Salvando...'; btnSalvar.disabled = true;
+
+  try {
+    let pedidoId = editPedidoId;
+    if (editPedidoId) {
+      const { error: errUpd } = await sb.from('pedidos').update(pedidoData).eq('id', editPedidoId);
+      if (errUpd) throw new Error('Erro ao atualizar pedido: ' + errUpd.message);
+      await sb.from('itens_pedido').delete().eq('pedido_id', editPedidoId);
+    } else {
+      const { data, error: errIns } = await sb.from('pedidos').insert(pedidoData).select().single();
+      if (errIns) throw new Error('Erro ao criar pedido: ' + errIns.message);
+      pedidoId = data?.id;
+    }
+
+    if (!pedidoId) throw new Error('ID do pedido não retornado');
+
+    // Montar itens garantindo tipos corretos
+    const itensParaSalvar = itens.map(it => ({
+      empresa_id: String(empresaId),
+      pedido_id: String(pedidoId),
+      modelo: String(it.modelo),
+      cor: String(it.cor||''),
+      logotipo: String(it.logotipo||''),
+      quantidade: Number(it.quantidade),
+      valor_unitario: Number(it.valor_unitario),
+      valor_total: Number(it.valor_total),
+    }));
+
+    console.log('Salvando itens:', itensParaSalvar);
+
+    const { error: errItens } = await sb.from('itens_pedido').insert(itensParaSalvar);
+    if (errItens) {
+      console.error('Erro itens_pedido:', errItens);
+      // Tentar sem valor_total caso coluna não aceite
+      const itensSemTotal = itensParaSalvar.map(({ valor_total, ...resto }) => resto);
+      const { error: errItens2 } = await sb.from('itens_pedido').insert(itensSemTotal);
+      if (errItens2) throw new Error('Erro ao salvar itens: ' + errItens2.message);
+    }
+
+    const finData = {
+      empresa_id: empresaId,
+      pedido_id: pedidoId,
+      valor_total: totalVal,
+      valor_entrada: parseFloat(document.getElementById('p-entrada').value)||0,
+      data_entrada: document.getElementById('p-data-entrada').value||null,
+      forma_pagamento: document.getElementById('p-forma').value||null,
+      custo_total: parseFloat(document.getElementById('p-custo').value)||0,
+    };
+    const { error: errFin } = await sb.from('financeiro_pedido').upsert(finData, { onConflict: 'pedido_id' });
+    if (errFin) throw new Error('Erro ao salvar financeiro: ' + errFin.message);
+
+    for (let i = 1; i <= entregaFormCount; i++) {
+      const qtdE = parseInt(document.getElementById('ent-qtd-'+i)?.value)||0;
+      const dataE = document.getElementById('ent-data-'+i)?.value;
+      if (qtdE && dataE) {
+        await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE });
+      }
+    }
+
+    showToast(editPedidoId ? 'Pedido atualizado!' : 'Pedido criado com sucesso!', 'success');
+    resetPedidoForm();
+    await loadAll();
+    nav('pedidos');
+
+  } catch(e) {
+    console.error('Erro ao salvar pedido:', e);
+    showToast('Erro: ' + e.message, 'error');
+  } finally {
+    btnSalvar.textContent = 'Salvar pedido'; btnSalvar.disabled = false;
   }
-
-  if (!pedidoId) { showToast('Erro ao salvar pedido', 'error'); return; }
-
-  await sb.from('itens_pedido').insert(itens.map(it=>({...it, pedido_id: pedidoId})));
-
-  const finData = {
-    empresa_id: empresaId, pedido_id: pedidoId,
-    valor_total: totalVal,
-    valor_entrada: parseFloat(document.getElementById('p-entrada').value)||0,
-    data_entrada: document.getElementById('p-data-entrada').value||null,
-    forma_pagamento: document.getElementById('p-forma').value,
-    custo_total: parseFloat(document.getElementById('p-custo').value)||0,
-  };
-  await sb.from('financeiro_pedido').upsert(finData, { onConflict: 'pedido_id' });
-
-  for (let i = 1; i <= entregaFormCount; i++) {
-    const qtd = parseInt(document.getElementById('ent-qtd-'+i)?.value)||0;
-    const data = document.getElementById('ent-data-'+i)?.value;
-    if (qtd && data) await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtd, data_prevista: data });
-  }
-
-  showToast(editPedidoId ? 'Pedido atualizado!' : 'Pedido criado com sucesso!', 'success');
-  resetPedidoForm();
-  await loadAll();
-  nav('pedidos');
 }
 
 function resetPedidoForm() {
@@ -1169,26 +1211,34 @@ async function editarPedido(id) {
   document.getElementById('p-data').value = pedido.data_pedido;
   document.getElementById('p-prazo').value = pedido.prazo_entrega||'';
   document.getElementById('p-obs').value = pedido.observacoes||'';
-  const f = pedido.financeiro_pedido?.[0];
+
+  // Recarregar financeiro direto do banco para garantir dados atuais
+  const { data: finRows } = await sb.from('financeiro_pedido').select('*').eq('pedido_id', id);
+  const f = finRows?.[0] || pedido.financeiro_pedido?.[0];
   if (f) {
     document.getElementById('p-entrada').value = f.valor_entrada||'';
     document.getElementById('p-data-entrada').value = f.data_entrada||'';
     document.getElementById('p-forma').value = f.forma_pagamento||'';
     document.getElementById('p-custo').value = f.custo_total||'';
+  } else {
+    document.getElementById('p-entrada').value = '';
+    document.getElementById('p-data-entrada').value = '';
+    document.getElementById('p-forma').value = '';
+    document.getElementById('p-custo').value = '';
   }
+
   document.getElementById('itens-tbody').innerHTML = '';
   itemCount = 0;
   const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', id);
   (itens||[]).forEach(it => {
     itemCount++;
-    // FIX: calcular valor_total se vier nulo
     const valorTotal = it.valor_total || (it.quantidade * it.valor_unitario);
     const tr = document.createElement('tr');
     tr.id = 'item-row-'+itemCount;
     tr.innerHTML = `
-      <td><input type="text" value="${it.modelo||''}" id="it-modelo-${itemCount}"></td>
-      <td><input type="text" value="${it.cor||''}" id="it-cor-${itemCount}" style="width:80px"></td>
-      <td><input type="text" value="${it.logotipo||''}" id="it-logo-${itemCount}"></td>
+      <td><input type="text" value="${(it.modelo||'').replace(/"/g,'&quot;')}" id="it-modelo-${itemCount}"></td>
+      <td><input type="text" value="${(it.cor||'').replace(/"/g,'&quot;')}" id="it-cor-${itemCount}" style="width:80px"></td>
+      <td><input type="text" value="${(it.logotipo||'').replace(/"/g,'&quot;')}" id="it-logo-${itemCount}"></td>
       <td><input type="number" value="${it.quantidade}" id="it-qtd-${itemCount}" oninput="calcTotal()" style="width:65px"></td>
       <td><input type="number" step="0.01" value="${it.valor_unitario}" id="it-preco-${itemCount}" oninput="calcTotal()" style="width:80px"></td>
       <td style="font-weight:500" id="it-total-${itemCount}">${fmt(valorTotal)}</td>
