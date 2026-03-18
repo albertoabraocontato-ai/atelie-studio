@@ -742,7 +742,7 @@ async function loadAll() {
 }
 
 async function loadPedidos() {
-  const { data } = await sb.from('pedidos').select('*, clientes(razao_social), financeiro_pedido(*)').eq('empresa_id', empresaId).order('criado_em', { ascending: false });
+  const { data } = await sb.from('pedidos').select('*, clientes(razao_social), financeiro_pedido(*), itens_pedido(quantidade, valor_unitario, valor_total)').eq('empresa_id', empresaId).order('criado_em', { ascending: false });
   allPedidos = data || [];
   renderPedidos();
   populatePdfSelect();
@@ -854,7 +854,9 @@ function renderPedidos(list) {
   if (!dados.length) { tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido encontrado</div></div></td></tr>'; return; }
   tb.innerHTML = dados.map(p => {
     const f = p.financeiro_pedido?.[0];
-    const total = f?.valor_total || 0;
+    // Calcular total dos itens como fallback se financeiro estiver zerado
+    const totalItens = (p.itens_pedido||[]).reduce((s,it) => s + (it.valor_total || (it.quantidade * it.valor_unitario) || 0), 0);
+    const total = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalItens;
     const entrada = f?.valor_entrada || 0;
     const saldo = total - entrada;
     return `<tr>
@@ -1149,8 +1151,15 @@ async function salvarPedido() {
       forma_pagamento: document.getElementById('p-forma').value||null,
       custo_total: parseFloat(document.getElementById('p-custo').value)||0,
     };
-    const { error: errFin } = await sb.from('financeiro_pedido').upsert(finData, { onConflict: 'pedido_id' });
-    if (errFin) throw new Error('Erro ao salvar financeiro: ' + errFin.message);
+    // Verificar se já existe registro financeiro para este pedido
+    const { data: finExist } = await sb.from('financeiro_pedido').select('id').eq('pedido_id', pedidoId).maybeSingle();
+    if (finExist) {
+      const { error: errFin } = await sb.from('financeiro_pedido').update(finData).eq('pedido_id', pedidoId);
+      if (errFin) throw new Error('Erro ao atualizar financeiro: ' + errFin.message);
+    } else {
+      const { error: errFin } = await sb.from('financeiro_pedido').insert(finData);
+      if (errFin) throw new Error('Erro ao salvar financeiro: ' + errFin.message);
+    }
 
     for (let i = 1; i <= entregaFormCount; i++) {
       const qtdE = parseInt(document.getElementById('ent-qtd-'+i)?.value)||0;
@@ -1391,30 +1400,163 @@ async function gerarPDFPedido(id) {
   openModal('pdf-modal');
 }
 
-function gerarPDF() {
+async function gerarPDF() {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
   const id = document.getElementById('pdf-pedido-select').value;
   const pedido = allPedidos.find(p=>p.id===id);
   if (!pedido) { showToast('Selecione um pedido', 'error'); return; }
+
   const f = pedido?.financeiro_pedido?.[0];
   const cliente = allClientes.find(c=>c.id===pedido?.cliente_id);
+  const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', id);
+  const { data: entregas } = await sb.from('entregas').select('*').eq('pedido_id', id).order('data_prevista');
+
+  const itensComTotal = (itens||[]).map(it => ({
+    ...it,
+    valor_total_calc: it.valor_total || (it.quantidade * it.valor_unitario)
+  }));
+  const totalCalculado = itensComTotal.reduce((s, it) => s + it.valor_total_calc, 0);
+  const valorTotal = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalCalculado;
+  const entrada = f?.valor_entrada || 0;
+  const saldo = valorTotal - entrada;
+
+  const doc = new jsPDF();
+  let y = 20;
+
+  // === CABEÇALHO ===
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18); doc.text('Ateliê Studio', 20, 20);
+  doc.setFontSize(18); doc.text('Ateliê Studio', 20, y);
+  doc.setFontSize(13); doc.text(`PEDIDO #${String(pedido.numero).padStart(4,'0')}`, 190, y, { align: 'right' });
+  y += 7;
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10); doc.text('Caixas cartonadas sob encomenda', 20, 27);
-  doc.setFontSize(14); doc.setFont('helvetica', 'bold');
-  doc.text(`PEDIDO #${String(pedido.numero).padStart(4,'0')}`, 150, 20);
-  doc.setLineWidth(0.5); doc.line(20, 32, 190, 32);
+  doc.setFontSize(9); doc.setTextColor(150);
+  doc.text('Caixas cartonadas sob encomenda', 20, y);
+  doc.setTextColor(0);
+  y += 8;
+  doc.setLineWidth(0.5); doc.line(20, y, 190, y); y += 10;
+
+  // === CLIENTE + DATAS ===
+  doc.setFontSize(9); doc.setTextColor(150);
+  doc.text('CLIENTE', 20, y); doc.text('DATAS', 110, y); y += 5;
+  doc.setTextColor(0); doc.setFontSize(10);
+
+  const linhasCliente = [
+    ['Empresa', cliente?.razao_social||'—'],
+    ['CNPJ', cliente?.cnpj||'—'],
+    ['Contato', cliente?.responsavel||'—'],
+    ['WhatsApp', cliente?.telefone||'—'],
+  ];
+  const linhasDatas = [
+    ['Pedido em', fmtDate(pedido.data_pedido)],
+    ['Prazo de entrega', fmtDate(pedido.prazo_entrega)],
+    ['Forma de pgto', f?.forma_pagamento||'—'],
+  ];
+  const maxLinhas = Math.max(linhasCliente.length, linhasDatas.length);
+  for (let i = 0; i < maxLinhas; i++) {
+    if (linhasCliente[i]) {
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(120);
+      doc.setFontSize(9); doc.text(linhasCliente[i][0], 20, y);
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(0);
+      doc.setFontSize(10); doc.text(linhasCliente[i][1], 55, y);
+    }
+    if (linhasDatas[i]) {
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(120);
+      doc.setFontSize(9); doc.text(linhasDatas[i][0], 110, y);
+      doc.setFont('helvetica', 'normal'); doc.setTextColor(0);
+      doc.setFontSize(10); doc.text(linhasDatas[i][1], 150, y);
+    }
+    y += 7;
+  }
+  y += 3;
+  doc.setLineWidth(0.3); doc.line(20, y, 190, y); y += 8;
+
+  // === ITENS ===
+  doc.setFontSize(9); doc.setTextColor(150);
+  doc.text('ITENS DO PEDIDO', 20, y); y += 6;
+
+  // Cabeçalho tabela itens
+  doc.setFillColor(245, 240, 232);
+  doc.rect(20, y-4, 170, 7, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setTextColor(0); doc.setFontSize(9);
+  doc.text('Modelo', 22, y);
+  doc.text('Cor', 80, y);
+  doc.text('Logotipo', 105, y);
+  doc.text('Qtd', 145, y, { align: 'right' });
+  doc.text('Unit.', 163, y, { align: 'right' });
+  doc.text('Total', 190, y, { align: 'right' });
+  y += 7;
+
   doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-  doc.text(`Cliente: ${cliente?.razao_social||'—'}`, 20, 42);
-  doc.text(`CNPJ: ${cliente?.cnpj||'—'}`, 20, 49);
-  doc.text(`Contato: ${cliente?.responsavel||'—'}`, 20, 56);
-  doc.text(`Data do pedido: ${fmtDate(pedido.data_pedido)}`, 120, 42);
-  doc.text(`Prazo de entrega: ${fmtDate(pedido.prazo_entrega)}`, 120, 49);
-  doc.text(`Pagamento: ${f?.forma_pagamento||'—'}`, 120, 56);
-  doc.line(20, 62, 190, 62);
-  doc.setFont('helvetica', 'bold'); doc.text('ITENS DO PEDIDO', 20, 70);
+  itensComTotal.forEach((it, idx) => {
+    if (idx % 2 === 0) { doc.setFillColor(252, 249, 245); doc.rect(20, y-4, 170, 7, 'F'); }
+    doc.setTextColor(0);
+    doc.text(String(it.modelo||'').substring(0,25), 22, y);
+    doc.text(String(it.cor||'').substring(0,12), 80, y);
+    doc.text(String(it.logotipo||'').substring(0,14), 105, y);
+    doc.text(String(it.quantidade), 145, y, { align: 'right' });
+    doc.text(fmt(it.valor_unitario), 163, y, { align: 'right' });
+    doc.setFont('helvetica', 'bold');
+    doc.text(fmt(it.valor_total_calc), 190, y, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    y += 7;
+  });
+  y += 3;
+
+  // === ENTREGAS ===
+  if (entregas && entregas.length > 0) {
+    doc.setLineWidth(0.3); doc.line(20, y, 190, y); y += 8;
+    doc.setFontSize(9); doc.setTextColor(150);
+    doc.text('ENTREGAS PREVISTAS', 20, y); y += 6;
+    doc.setFillColor(245, 240, 232);
+    doc.rect(20, y-4, 170, 7, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setTextColor(0); doc.setFontSize(9);
+    doc.text('Data prevista', 22, y);
+    doc.text('Quantidade', 100, y);
+    doc.text('Status', 160, y);
+    y += 7;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    entregas.forEach((e, idx) => {
+      if (idx % 2 === 0) { doc.setFillColor(252, 249, 245); doc.rect(20, y-4, 170, 7, 'F'); }
+      doc.setTextColor(0);
+      doc.text(fmtDate(e.data_prevista), 22, y);
+      doc.text(`${e.quantidade} unidades`, 100, y);
+      doc.text(e.status === 'entregue' ? 'Entregue' : e.status === 'atrasado' ? 'Atrasado' : 'Pendente', 160, y);
+      y += 7;
+    });
+    y += 3;
+  }
+
+  // === TOTAIS ===
+  doc.setLineWidth(0.3); doc.line(20, y, 190, y); y += 8;
+
+  // Linha entrada
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(80);
+  doc.text('Entrada paga:', 120, y);
+  doc.setTextColor(0);
+  doc.text(fmt(entrada), 190, y, { align: 'right' });
+  y += 7;
+
+  // Saldo
+  doc.setTextColor(180, 50, 20);
+  doc.text('Saldo pendente:', 120, y);
+  doc.setFont('helvetica', 'bold');
+  doc.text(fmt(saldo), 190, y, { align: 'right' });
+  y += 8;
+
+  // Total destaque
+  doc.setFillColor(61, 43, 26);
+  doc.rect(20, y-5, 170, 10, 'F');
+  doc.setTextColor(255); doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('VALOR TOTAL DO PEDIDO', 25, y+1);
+  doc.setFontSize(12); doc.setFont('helvetica', 'bold');
+  doc.text(fmt(valorTotal), 188, y+1, { align: 'right' });
+  y += 18;
+
+  // === TERMOS ===
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120);
+  doc.text('Termos: Prazo de produção conforme acordado. Entrega condicionada ao pagamento do saldo pendente.', 20, y);
+
   doc.save(`pedido-${String(pedido.numero).padStart(4,'0')}.pdf`);
   showToast('PDF gerado!', 'success');
 }
