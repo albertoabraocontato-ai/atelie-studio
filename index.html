@@ -1126,7 +1126,7 @@ async function salvarPedido() {
 
     if (!pedidoId) throw new Error('ID do pedido não retornado');
 
-    // Montar itens garantindo tipos corretos
+    // valor_total é coluna gerada no banco (calculada automaticamente) — não enviar
     const itensParaSalvar = itens.map(it => ({
       empresa_id: String(empresaId),
       pedido_id: String(pedidoId),
@@ -1135,19 +1135,10 @@ async function salvarPedido() {
       logotipo: String(it.logotipo||''),
       quantidade: Number(it.quantidade),
       valor_unitario: Number(it.valor_unitario),
-      valor_total: Number(it.valor_total),
     }));
 
-    console.log('Salvando itens:', itensParaSalvar);
-
     const { error: errItens } = await sb.from('itens_pedido').insert(itensParaSalvar);
-    if (errItens) {
-      console.error('Erro itens_pedido:', errItens);
-      // Tentar sem valor_total caso coluna não aceite
-      const itensSemTotal = itensParaSalvar.map(({ valor_total, ...resto }) => resto);
-      const { error: errItens2 } = await sb.from('itens_pedido').insert(itensSemTotal);
-      if (errItens2) throw new Error('Erro ao salvar itens: ' + errItens2.message);
-    }
+    if (errItens) throw new Error('Erro ao salvar itens: ' + errItens.message);
 
     const finData = {
       empresa_id: empresaId,
