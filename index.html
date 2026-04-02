@@ -17,8 +17,6 @@
 }
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh}
 .app{display:flex;min-height:100vh}
-
-/* AUTH */
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--dark)}
 .auth-box{background:var(--cream);border-radius:16px;padding:40px;width:100%;max-width:400px}
 .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px}
@@ -39,9 +37,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .btn-ghost:hover{background:var(--tan)}
 .btn-danger{background:#fef0ef;color:#8b2020;border:1px solid #f5bfbf}
 .btn-danger:hover{background:#f5bfbf}
+.btn-green{background:var(--forest);color:white;border:none}
+.btn-green:hover{background:#1e4a1e}
 .auth-err{background:#fef0ef;color:#8b2020;border:1px solid #f5bfbf;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
-
-/* SIDEBAR */
 .sidebar{width:var(--sidebar);background:var(--dark);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .2s}
 .logo-area{padding:20px 16px;border-bottom:1px solid rgba(196,168,130,.2)}
 .logo-box{background:var(--terra);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px}
@@ -62,16 +60,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .user-name{font-size:12px;color:rgba(245,240,232,.7);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .logout-btn{background:none;border:none;cursor:pointer;color:rgba(196,168,130,.5);font-size:16px;padding:4px;border-radius:4px}
 .logout-btn:hover{color:var(--cream);background:rgba(196,168,130,.15)}
-
-/* MAIN */
 .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
 .topbar{background:white;border-bottom:1px solid var(--tan);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
 .page-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--dark)}
 .page-sub{font-size:11px;color:var(--kraft);margin-top:1px}
 .topbar-actions{display:flex;gap:8px;align-items:center}
 .content{padding:20px 24px;flex:1}
-
-/* ALERTS */
 .alert-strip{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
 .alert-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:500}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
@@ -79,8 +73,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .ap-warning{background:#fff5e6;color:#7a3e0a;border:1px solid #f5d49a}.ap-warning .dot{background:var(--a)}
 .ap-info{background:#eaf2fd;color:#0d3868;border:1px solid #a3c8f0}.ap-info .dot{background:var(--b)}
 .ap-success{background:#edf7f0;color:#1a4d25;border:1px solid #a8d9b5}.ap-success .dot{background:var(--g)}
-
-/* METRICS */
 .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
 .metric-card{background:white;border-radius:12px;padding:16px 18px;border:1px solid var(--tan);position:relative;overflow:hidden}
 .metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
@@ -88,23 +80,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .metric-label{font-size:10px;color:var(--kraft);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
 .metric-value{font-family:'DM Serif Display',serif;font-size:24px;color:var(--dark);line-height:1}
 .metric-sub{font-size:11px;color:var(--kraft);margin-top:3px}
-
-/* CARDS */
 .section-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
 .card{background:white;border-radius:12px;border:1px solid var(--tan);overflow:hidden}
 .card-header{padding:14px 18px;border-bottom:1px solid var(--tan);display:flex;align-items:center;justify-content:space-between}
 .card-title{font-weight:500;font-size:13px;color:var(--dark);display:flex;align-items:center;gap:7px}
 .card-body{padding:14px 18px}
-
-/* TABLE */
 .data-table{width:100%;border-collapse:collapse}
 .data-table th{font-size:10px;font-weight:600;color:var(--kraft);text-transform:uppercase;letter-spacing:.6px;padding:9px 14px;border-bottom:2px solid var(--tan);text-align:left;white-space:nowrap}
 .data-table td{padding:11px 14px;font-size:13px;border-bottom:1px solid var(--tan);color:var(--dark)}
 .data-table tr:last-child td{border-bottom:none}
 .data-table tr:hover td{background:var(--cream)}
 .table-wrap{overflow-x:auto}
-
-/* STATUS */
 .status{font-size:10px;font-weight:600;padding:3px 9px;border-radius:10px;white-space:nowrap;letter-spacing:.3px;display:inline-block}
 .s-orc{background:#f5f0ff;color:#3a1a7a;border:1px solid #c0a8f5}
 .s-agu{background:#e6f0ff;color:#1a3a7a;border:1px solid #9abaf0}
@@ -118,27 +104,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .s-ok{background:#edf7f0;color:#1a4d25;border:1px solid #a8d9b5}
 .s-baixo{background:#fff3cc;color:#7a5500;border:1px solid #f0d060}
 .s-crit{background:#fef0ef;color:#8b2020;border:1px solid #f5bfbf}
-
-/* PANELS */
 .panel{display:none}.panel.active{display:block}
-
-/* STOCK BAR */
 .stock-bar-wrap{width:70px;height:6px;background:var(--tan);border-radius:3px;overflow:hidden;display:inline-block}
 .stock-bar{height:100%;border-radius:3px}
 .bar-ok{background:var(--forest)}.bar-low{background:var(--a)}.bar-crit{background:var(--r)}
-
-/* CALENDAR */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.cal-dn{text-align:center;font-size:10px;color:var(--kraft);padding:3px 0;font-weight:500}
-.cal-day{text-align:center;font-size:11px;padding:5px 2px;border-radius:5px;cursor:default;position:relative}
-.cal-day.empty{opacity:0}
-.cal-day.today{background:var(--terra);color:white;font-weight:600}
-.cal-day.has-ev{background:var(--cream);border:1px solid var(--tan);cursor:pointer}
-.cal-day.has-ev:hover{background:var(--tan)}
-.cal-dot{width:5px;height:5px;border-radius:50%;margin:1px auto 0}
-.cd-ok{background:var(--g)}.cd-pend{background:var(--a)}.cd-atras{background:var(--r)}
-
-/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
 .modal-overlay.open{display:flex}
 .modal-box{background:white;border-radius:16px;width:100%;max-width:580px;max-height:88vh;overflow-y:auto;border:1px solid var(--tan)}
@@ -148,14 +117,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);m
 .modal-close:hover{background:var(--cream)}
 .modal-body{padding:18px 22px}
 .modal-footer{padding:0 22px 22px;display:flex;gap:10px;justify-content:flex-end}
-
-/* FORM */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fg-full{grid-column:1/-1}
 .section-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--kraft);margin-bottom:8px;font-weight:600}
 textarea.form-input{resize:vertical;min-height:60px}
-
-/* FINANCIAL */
 .fin-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--tan);font-size:13px}
 .fin-row:last-child{border-bottom:none}
 .fin-lbl{color:var(--kraft)}
@@ -164,18 +129,12 @@ textarea.form-input{resize:vertical;min-height:60px}
 .fin-total-lbl{color:rgba(245,240,232,.65);font-size:12px}
 .fin-total-val{color:white;font-family:'DM Serif Display',serif;font-size:20px}
 .fin-saldo{background:#fff0e8;border-radius:8px;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px;border:1px solid #f0b090}
-
-/* LOADING */
 .loading{display:flex;align-items:center;justify-content:center;padding:40px;color:var(--kraft);font-size:13px;gap:10px}
 .spinner{width:20px;height:20px;border:2px solid var(--tan);border-top-color:var(--terra);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* EMPTY */
 .empty-state{text-align:center;padding:40px 20px;color:var(--kraft)}
 .empty-icon{font-size:36px;margin-bottom:12px;opacity:.4}
 .empty-text{font-size:13px}
-
-/* ITEMS TABLE */
 .items-table{width:100%;border-collapse:collapse;margin-bottom:10px}
 .items-table th{font-size:10px;font-weight:600;color:var(--kraft);text-transform:uppercase;letter-spacing:.5px;padding:7px 8px;border-bottom:1px solid var(--tan);text-align:left}
 .items-table td{padding:6px 8px;border-bottom:1px solid var(--tan)}
@@ -183,8 +142,6 @@ textarea.form-input{resize:vertical;min-height:60px}
 .items-table td input:focus{border-color:var(--terra);background:white}
 .remove-item{background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:2px 5px}
 .remove-item:hover{color:var(--r)}
-
-/* PDF PREVIEW */
 .pdf-prev{background:var(--cream);border:2px dashed var(--tan);border-radius:12px;padding:22px}
 .pdf-logo-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:2px solid var(--tan)}
 .pdf-logo-icon{width:44px;height:44px;background:var(--terra);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
@@ -196,22 +153,27 @@ textarea.form-input{resize:vertical;min-height:60px}
 .pdf-row:last-child{border-bottom:none}
 .pdf-lbl{color:var(--kraft)}.pdf-val{font-weight:500;color:var(--dark)}
 .pdf-item-row{background:rgba(61,43,26,.05);border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:11px;display:flex;justify-content:space-between}
-
-/* CONFIRM MODAL */
 .confirm-box{background:white;border-radius:16px;width:100%;max-width:420px;border:1px solid var(--tan);padding:28px}
 .confirm-icon{font-size:36px;text-align:center;margin-bottom:12px}
 .confirm-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--dark);text-align:center;margin-bottom:8px}
 .confirm-desc{font-size:13px;color:var(--brown);text-align:center;margin-bottom:24px;line-height:1.5}
 .confirm-actions{display:flex;gap:10px;justify-content:center}
-
-/* TOAST */
+/* PAGAMENTOS */
+.pgto-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--cream);border-radius:8px;margin-bottom:6px;border:1px solid var(--tan)}
+.pgto-info{display:flex;flex-direction:column;gap:2px}
+.pgto-valor{font-weight:600;color:var(--forest);font-size:14px}
+.pgto-meta{font-size:11px;color:var(--kraft)}
+.pgto-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:2px 6px;border-radius:4px}
+.pgto-del:hover{color:var(--r);background:#fef0ef}
+.saldo-box{border-radius:10px;padding:14px 16px;margin-top:12px}
+.saldo-pago{background:#edf7f0;border:1px solid #a8d9b5}
+.saldo-devendo{background:#fff0e8;border:1px solid #f0b090}
+.saldo-quitado{background:#edf7f0;border:2px solid var(--forest)}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:white;padding:12px 18px;border-radius:10px;font-size:13px;z-index:300;transform:translateY(80px);opacity:0;transition:all .3s;max-width:320px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{border-left:4px solid var(--g)}
 .toast.error{border-left:4px solid var(--r)}
 .toast.warning{border-left:4px solid var(--a)}
-
-/* RESPONSIVE */
 @media(max-width:768px){
   .sidebar{width:56px}
   .sidebar .logo-text,.sidebar .nav-item span,.sidebar .nav-label,.sidebar .badge,.sidebar .user-name{display:none}
@@ -225,82 +187,37 @@ textarea.form-input{resize:vertical;min-height:60px}
 </head>
 <body>
 
-<!-- AUTH -->
 <div id="auth-screen" class="auth-wrap">
   <div class="auth-box">
-    <div class="auth-logo">
-      <div class="auth-logo-icon">📦</div>
-      <div>
-        <div class="auth-brand">Ateliê Studio</div>
-        <div class="auth-sub">Sistema de Gestão</div>
-      </div>
-    </div>
+    <div class="auth-logo"><div class="auth-logo-icon">📦</div><div><div class="auth-brand">Ateliê Studio</div><div class="auth-sub">Sistema de Gestão</div></div></div>
     <div class="auth-title">Bem-vindo de volta</div>
     <div class="auth-desc">Entre com seu e-mail e senha para acessar</div>
     <div id="auth-err" class="auth-err"></div>
-    <div class="form-group">
-      <label class="form-label">E-mail</label>
-      <input type="email" id="login-email" class="form-input" placeholder="seu@email.com">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Senha</label>
-      <input type="password" id="login-pass" class="form-input" placeholder="••••••••">
-    </div>
+    <div class="form-group"><label class="form-label">E-mail</label><input type="email" id="login-email" class="form-input" placeholder="seu@email.com"></div>
+    <div class="form-group"><label class="form-label">Senha</label><input type="password" id="login-pass" class="form-input" placeholder="••••••••"></div>
     <button class="btn btn-primary" onclick="doLogin()">Entrar no sistema</button>
-    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--kraft)">
-      Primeiro acesso? <a href="#" onclick="showRegister()" style="color:var(--terra);text-decoration:none;font-weight:500">Criar conta</a>
-    </div>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--kraft)">Primeiro acesso? <a href="#" onclick="showRegister()" style="color:var(--terra);text-decoration:none;font-weight:500">Criar conta</a></div>
   </div>
 </div>
 
-<!-- REGISTER -->
 <div id="register-screen" class="auth-wrap" style="display:none">
   <div class="auth-box">
-    <div class="auth-logo">
-      <div class="auth-logo-icon">📦</div>
-      <div>
-        <div class="auth-brand">Ateliê Studio</div>
-        <div class="auth-sub">Criar conta</div>
-      </div>
-    </div>
+    <div class="auth-logo"><div class="auth-logo-icon">📦</div><div><div class="auth-brand">Ateliê Studio</div><div class="auth-sub">Criar conta</div></div></div>
     <div class="auth-title">Criar conta</div>
     <div class="auth-desc">Preencha os dados para começar</div>
     <div id="reg-err" class="auth-err"></div>
-    <div class="form-group">
-      <label class="form-label">Seu nome</label>
-      <input type="text" id="reg-nome" class="form-input" placeholder="Nome completo">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nome do ateliê / empresa</label>
-      <input type="text" id="reg-empresa" class="form-input" placeholder="Ex: Ateliê Cartonado">
-    </div>
-    <div class="form-group">
-      <label class="form-label">E-mail</label>
-      <input type="email" id="reg-email" class="form-input" placeholder="seu@email.com">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Senha</label>
-      <input type="password" id="reg-pass" class="form-input" placeholder="Mínimo 6 caracteres">
-    </div>
+    <div class="form-group"><label class="form-label">Seu nome</label><input type="text" id="reg-nome" class="form-input" placeholder="Nome completo"></div>
+    <div class="form-group"><label class="form-label">Nome do ateliê / empresa</label><input type="text" id="reg-empresa" class="form-input" placeholder="Ex: Ateliê Cartonado"></div>
+    <div class="form-group"><label class="form-label">E-mail</label><input type="email" id="reg-email" class="form-input" placeholder="seu@email.com"></div>
+    <div class="form-group"><label class="form-label">Senha</label><input type="password" id="reg-pass" class="form-input" placeholder="Mínimo 6 caracteres"></div>
     <button class="btn btn-primary" onclick="doRegister()">Criar conta</button>
-    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--kraft)">
-      Já tem conta? <a href="#" onclick="showLogin()" style="color:var(--terra);text-decoration:none;font-weight:500">Entrar</a>
-    </div>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--kraft)">Já tem conta? <a href="#" onclick="showLogin()" style="color:var(--terra);text-decoration:none;font-weight:500">Entrar</a></div>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app-screen" class="app" style="display:none">
   <aside class="sidebar">
-    <div class="logo-area">
-      <div class="logo-box">
-        <div class="logo-icon">📦</div>
-        <div class="logo-text">
-          <div class="brand">Ateliê Studio</div>
-          <div class="sub">Gestão</div>
-        </div>
-      </div>
-    </div>
+    <div class="logo-area"><div class="logo-box"><div class="logo-icon">📦</div><div class="logo-text"><div class="brand">Ateliê Studio</div><div class="sub">Gestão</div></div></div></div>
     <div class="nav-section">
       <div class="nav-label">Principal</div>
       <button class="nav-item active" onclick="nav('dashboard')"><div class="nav-icon">🏠</div><span>Dashboard</span></button>
@@ -324,16 +241,12 @@ textarea.form-input{resize:vertical;min-height:60px}
 
   <div class="main">
     <div class="topbar">
-      <div>
-        <div class="page-title" id="page-title">Dashboard</div>
-        <div class="page-sub" id="page-sub">Visão geral</div>
-      </div>
+      <div><div class="page-title" id="page-title">Dashboard</div><div class="page-sub" id="page-sub">Visão geral</div></div>
       <div class="topbar-actions" id="topbar-actions">
         <button class="btn btn-ghost btn-sm" onclick="openModal('pdf-modal')">📄 PDF</button>
         <button class="btn btn-primary btn-sm" onclick="nav('novo-pedido')">+ Novo Pedido</button>
       </div>
     </div>
-
     <div class="content">
 
       <!-- DASHBOARD -->
@@ -346,27 +259,12 @@ textarea.form-input{resize:vertical;min-height:60px}
           <div class="metric-card mc-n"><div class="metric-label">Entregas esta semana</div><div class="metric-value" id="m-ent">0</div><div class="metric-sub" id="m-ent-sub">carregando...</div></div>
         </div>
         <div class="section-grid">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">📋 Pedidos Recentes</div>
-              <button class="btn btn-ghost btn-sm" onclick="nav('pedidos')">Ver todos</button>
-            </div>
-            <div id="dash-pedidos-list"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
-          </div>
-          <div class="card">
-            <div class="card-header"><div class="card-title">📦 Estoque — Visão Rápida</div><button class="btn btn-ghost btn-sm" onclick="nav('estoque')">Ver estoque</button></div>
-            <div id="dash-estoque-list"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
-          </div>
+          <div class="card"><div class="card-header"><div class="card-title">📋 Pedidos Recentes</div><button class="btn btn-ghost btn-sm" onclick="nav('pedidos')">Ver todos</button></div><div id="dash-pedidos-list"><div class="loading"><div class="spinner"></div>Carregando...</div></div></div>
+          <div class="card"><div class="card-header"><div class="card-title">📦 Estoque — Visão Rápida</div><button class="btn btn-ghost btn-sm" onclick="nav('estoque')">Ver estoque</button></div><div id="dash-estoque-list"><div class="loading"><div class="spinner"></div>Carregando...</div></div></div>
         </div>
         <div class="section-grid">
-          <div class="card">
-            <div class="card-header"><div class="card-title">📅 Próximas Entregas</div></div>
-            <div id="dash-entregas-list"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
-          </div>
-          <div class="card">
-            <div class="card-header"><div class="card-title">💰 Resumo Financeiro</div></div>
-            <div class="card-body" id="dash-fin"></div>
-          </div>
+          <div class="card"><div class="card-header"><div class="card-title">📅 Próximas Entregas</div></div><div id="dash-entregas-list"><div class="loading"><div class="spinner"></div>Carregando...</div></div></div>
+          <div class="card"><div class="card-header"><div class="card-title">💰 Resumo Financeiro</div></div><div class="card-body" id="dash-fin"></div></div>
         </div>
       </div>
 
@@ -388,8 +286,8 @@ textarea.form-input{resize:vertical;min-height:60px}
         <div class="card">
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>Nº</th><th>Cliente</th><th>Data</th><th>Prazo</th><th>Valor</th><th>Saldo</th><th>Status</th><th>Ações</th></tr></thead>
-              <tbody id="pedidos-tbody"><tr><td colspan="8"><div class="loading"><div class="spinner"></div>Carregando...</div></td></tr></tbody>
+              <thead><tr><th>Nº</th><th>Cliente</th><th>Data</th><th>Prazo</th><th>Valor</th><th>Recebido</th><th>Saldo</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="pedidos-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -405,7 +303,7 @@ textarea.form-input{resize:vertical;min-height:60px}
           <div class="table-wrap">
             <table class="data-table">
               <thead><tr><th>Razão social</th><th>CNPJ</th><th>Responsável</th><th>WhatsApp</th><th>Pedidos</th><th>Ações</th></tr></thead>
-              <tbody id="clientes-tbody"><tr><td colspan="6"><div class="loading"><div class="spinner"></div>Carregando...</div></td></tr></tbody>
+              <tbody id="clientes-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -418,7 +316,7 @@ textarea.form-input{resize:vertical;min-height:60px}
           <div class="table-wrap">
             <table class="data-table">
               <thead><tr><th>Data prevista</th><th>Pedido</th><th>Cliente</th><th>Quantidade</th><th>Status</th><th>Ações</th></tr></thead>
-              <tbody id="agenda-tbody"><tr><td colspan="6"><div class="loading"><div class="spinner"></div>Carregando...</div></td></tr></tbody>
+              <tbody id="agenda-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -433,11 +331,11 @@ textarea.form-input{resize:vertical;min-height:60px}
           <div class="metric-card mc-n"><div class="metric-label">Margem média</div><div class="metric-value" id="fin-margem">0%</div></div>
         </div>
         <div class="card">
-          <div class="card-header"><div class="card-title">💳 Lançamentos</div></div>
+          <div class="card-header"><div class="card-title">💳 Lançamentos por pedido</div></div>
           <div class="table-wrap">
             <table class="data-table">
-              <thead><tr><th>Pedido</th><th>Cliente</th><th>Valor total</th><th>Entrada</th><th>Forma pgto</th><th>Saldo</th><th>Custo</th><th>Lucro</th><th>Margem</th></tr></thead>
-              <tbody id="fin-tbody"><tr><td colspan="9"><div class="loading"><div class="spinner"></div>Carregando...</div></td></tr></tbody>
+              <thead><tr><th>Pedido</th><th>Cliente</th><th>Valor total</th><th>Recebido</th><th>Saldo</th><th>Custo</th><th>Lucro</th><th>Margem</th><th>Ações</th></tr></thead>
+              <tbody id="fin-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -454,7 +352,7 @@ textarea.form-input{resize:vertical;min-height:60px}
           <div class="table-wrap">
             <table class="data-table">
               <thead><tr><th>Material</th><th>Qtd atual</th><th>Unidade</th><th>Estoque mín.</th><th>Custo/unit</th><th>Valor total</th><th>Status</th><th>Ações</th></tr></thead>
-              <tbody id="estoque-tbody"><tr><td colspan="8"><div class="loading"><div class="spinner"></div>Carregando...</div></td></tr></tbody>
+              <tbody id="estoque-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -467,75 +365,44 @@ textarea.form-input{resize:vertical;min-height:60px}
           <div class="card-body">
             <div class="section-label">Dados gerais</div>
             <div class="form-grid" style="margin-bottom:18px">
-              <div class="form-group">
-                <label class="form-label">Cliente *</label>
-                <select class="form-select" id="p-cliente"><option value="">Selecionar cliente...</option></select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Status</label>
+              <div class="form-group"><label class="form-label">Cliente *</label><select class="form-select" id="p-cliente"><option value="">Selecionar cliente...</option></select></div>
+              <div class="form-group"><label class="form-label">Status</label>
                 <select class="form-select" id="p-status">
                   <option value="orcamento">Orçamento</option>
                   <option value="aguardando_entrada">Aguardando entrada</option>
                   <option value="em_producao">Em produção</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label class="form-label">Data do pedido *</label>
-                <input type="date" class="form-input" id="p-data">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Prazo de entrega</label>
-                <input type="date" class="form-input" id="p-prazo">
-              </div>
-              <div class="form-group fg-full">
-                <label class="form-label">Observações</label>
-                <textarea class="form-input" id="p-obs" placeholder="Detalhes adicionais..."></textarea>
-              </div>
+              <div class="form-group"><label class="form-label">Data do pedido *</label><input type="date" class="form-input" id="p-data"></div>
+              <div class="form-group"><label class="form-label">Prazo de entrega</label><input type="date" class="form-input" id="p-prazo"></div>
+              <div class="form-group fg-full"><label class="form-label">Observações</label><textarea class="form-input" id="p-obs" placeholder="Detalhes adicionais..."></textarea></div>
             </div>
-
             <div class="section-label">Itens do pedido</div>
             <table class="items-table">
               <thead><tr><th>Modelo</th><th>Cor</th><th>Logotipo</th><th>Qtd</th><th>Valor unit.</th><th>Total</th><th></th></tr></thead>
               <tbody id="itens-tbody"></tbody>
             </table>
             <button class="btn btn-ghost btn-sm" onclick="addItem()" style="margin-bottom:18px">+ Adicionar item</button>
-
             <div style="background:var(--cream);border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;justify-content:flex-end;align-items:center;gap:12px">
               <span style="font-size:13px;color:var(--kraft)">Valor total:</span>
               <span style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--terra)" id="total-display">R$ 0,00</span>
             </div>
-
             <div class="section-label">Financeiro</div>
             <div class="form-grid" style="margin-bottom:20px">
-              <div class="form-group">
-                <label class="form-label">Valor de entrada (R$)</label>
-                <input type="number" step="0.01" class="form-input" id="p-entrada" placeholder="0,00" oninput="calcSaldo()">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Data da entrada</label>
-                <input type="date" class="form-input" id="p-data-entrada">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Forma de pagamento</label>
+              <div class="form-group"><label class="form-label">Valor de entrada (R$)</label><input type="number" step="0.01" class="form-input" id="p-entrada" placeholder="0,00" oninput="calcSaldo()"></div>
+              <div class="form-group"><label class="form-label">Data da entrada</label><input type="date" class="form-input" id="p-data-entrada"></div>
+              <div class="form-group"><label class="form-label">Forma de pagamento</label>
                 <select class="form-select" id="p-forma">
                   <option value="">Selecionar...</option>
                   <option>PIX</option><option>Boleto</option><option>TED</option><option>Cartão</option><option>Cheque</option><option>Dinheiro</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label class="form-label">Custo total (R$)</label>
-                <input type="number" step="0.01" class="form-input" id="p-custo" placeholder="0,00">
-              </div>
-              <div class="form-group fg-full">
-                <label class="form-label">Saldo pendente</label>
-                <input type="text" class="form-input" id="p-saldo" readonly style="background:#f9f6f2;color:var(--r);font-weight:500">
-              </div>
+              <div class="form-group"><label class="form-label">Custo total (R$)</label><input type="number" step="0.01" class="form-input" id="p-custo" placeholder="0,00"></div>
+              <div class="form-group fg-full"><label class="form-label">Saldo pendente</label><input type="text" class="form-input" id="p-saldo" readonly style="background:#f9f6f2;color:var(--r);font-weight:500"></div>
             </div>
-
             <div class="section-label">Entregas</div>
             <div id="entregas-form-list" style="margin-bottom:10px"></div>
             <button class="btn btn-ghost btn-sm" onclick="addEntregaForm()" style="margin-bottom:20px">+ Adicionar entrega</button>
-
             <div style="display:flex;gap:10px;justify-content:flex-end">
               <button class="btn btn-ghost" onclick="nav('pedidos')">Cancelar</button>
               <button class="btn btn-primary" onclick="salvarPedido()" id="btn-salvar-pedido">Salvar pedido</button>
@@ -544,11 +411,11 @@ textarea.form-input{resize:vertical;min-height:60px}
         </div>
       </div>
 
-    </div><!-- /content -->
-  </div><!-- /main -->
-</div><!-- /app -->
+    </div>
+  </div>
+</div>
 
-<!-- MODAL CLIENTE -->
+<!-- MODAIS EXISTENTES -->
 <div class="modal-overlay" id="cliente-modal">
   <div class="modal-box">
     <div class="modal-header"><div class="modal-title" id="cliente-modal-title">Novo Cliente</div><button class="modal-close" onclick="closeModal('cliente-modal')">✕</button></div>
@@ -568,7 +435,6 @@ textarea.form-input{resize:vertical;min-height:60px}
   </div>
 </div>
 
-<!-- MODAL ESTOQUE -->
 <div class="modal-overlay" id="estoque-modal">
   <div class="modal-box">
     <div class="modal-header"><div class="modal-title" id="estoque-modal-title">Novo Material</div><button class="modal-close" onclick="closeModal('estoque-modal')">✕</button></div>
@@ -577,9 +443,7 @@ textarea.form-input{resize:vertical;min-height:60px}
         <div class="form-grid">
           <div class="form-group fg-full"><label class="form-label">Nome do material *</label><input type="text" class="form-input" id="e-nome" required></div>
           <div class="form-group"><label class="form-label">Quantidade atual</label><input type="number" step="0.001" class="form-input" id="e-qtd" value="0"></div>
-          <div class="form-group"><label class="form-label">Unidade</label>
-            <select class="form-select" id="e-unidade"><option>un</option><option>kg</option><option>g</option><option>L</option><option>ml</option><option>m</option><option>cm</option><option>folha</option><option>rolo</option><option>metro</option></select>
-          </div>
+          <div class="form-group"><label class="form-label">Unidade</label><select class="form-select" id="e-unidade"><option>un</option><option>kg</option><option>g</option><option>L</option><option>ml</option><option>m</option><option>cm</option><option>folha</option><option>rolo</option><option>metro</option></select></div>
           <div class="form-group"><label class="form-label">Custo por unidade (R$)</label><input type="number" step="0.01" class="form-input" id="e-custo" value="0"></div>
           <div class="form-group"><label class="form-label">Estoque mínimo</label><input type="number" step="0.001" class="form-input" id="e-min" value="0"></div>
         </div>
@@ -589,16 +453,13 @@ textarea.form-input{resize:vertical;min-height:60px}
   </div>
 </div>
 
-<!-- MODAL MOVIMENTAÇÃO -->
 <div class="modal-overlay" id="movimentacao-modal">
   <div class="modal-box">
     <div class="modal-header"><div class="modal-title">Movimentação de Estoque</div><button class="modal-close" onclick="closeModal('movimentacao-modal')">✕</button></div>
     <div class="modal-body">
       <div class="form-grid">
         <div class="form-group fg-full"><label class="form-label">Material *</label><select class="form-select" id="mov-material"></select></div>
-        <div class="form-group"><label class="form-label">Tipo</label>
-          <select class="form-select" id="mov-tipo"><option value="entrada">Entrada (compra)</option><option value="saida">Saída (consumo)</option></select>
-        </div>
+        <div class="form-group"><label class="form-label">Tipo</label><select class="form-select" id="mov-tipo"><option value="entrada">Entrada (compra)</option><option value="saida">Saída (consumo)</option></select></div>
         <div class="form-group"><label class="form-label">Quantidade</label><input type="number" step="0.001" class="form-input" id="mov-qtd" value="0"></div>
         <div class="form-group"><label class="form-label">Data</label><input type="date" class="form-input" id="mov-data"></div>
         <div class="form-group fg-full"><label class="form-label">Observações</label><input type="text" class="form-input" id="mov-obs"></div>
@@ -608,15 +469,11 @@ textarea.form-input{resize:vertical;min-height:60px}
   </div>
 </div>
 
-<!-- MODAL PDF -->
 <div class="modal-overlay" id="pdf-modal">
   <div class="modal-box">
     <div class="modal-header"><div class="modal-title">Gerar PDF do Pedido</div><button class="modal-close" onclick="closeModal('pdf-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group" style="margin-bottom:16px">
-        <label class="form-label">Selecionar pedido</label>
-        <select class="form-select" id="pdf-pedido-select" onchange="loadPdfPreview()"><option value="">Selecionar pedido...</option></select>
-      </div>
+      <div class="form-group" style="margin-bottom:16px"><label class="form-label">Selecionar pedido</label><select class="form-select" id="pdf-pedido-select" onchange="loadPdfPreview()"><option value="">Selecionar pedido...</option></select></div>
       <div id="pdf-preview-area"></div>
     </div>
     <div class="modal-footer">
@@ -627,31 +484,82 @@ textarea.form-input{resize:vertical;min-height:60px}
   </div>
 </div>
 
-<!-- MODAL ENTREGA STATUS -->
 <div class="modal-overlay" id="entrega-status-modal">
   <div class="modal-box" style="max-width:400px">
     <div class="modal-header"><div class="modal-title">Atualizar Entrega</div><button class="modal-close" onclick="closeModal('entrega-status-modal')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group"><label class="form-label">Status</label>
-        <select class="form-select" id="es-status"><option value="pendente">Pendente</option><option value="entregue">Entregue</option><option value="atrasado">Atrasado</option></select>
-      </div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="es-status"><option value="pendente">Pendente</option><option value="entregue">Entregue</option><option value="atrasado">Atrasado</option></select></div>
       <div class="form-group"><label class="form-label">Data realizada</label><input type="date" class="form-input" id="es-data"></div>
-      <input type="hidden" id="es-id">
-      <input type="hidden" id="es-pedido-id">
+      <input type="hidden" id="es-id"><input type="hidden" id="es-pedido-id">
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('entrega-status-modal')">Cancelar</button><button class="btn btn-primary" onclick="salvarStatusEntrega()">Atualizar</button></div>
   </div>
 </div>
 
-<!-- MODAL CONFIRMAR EXCLUSÃO -->
 <div class="modal-overlay" id="confirm-modal">
   <div class="confirm-box">
     <div class="confirm-icon">🗑️</div>
     <div class="confirm-title">Excluir pedido?</div>
-    <div class="confirm-desc" id="confirm-desc">Esta ação é permanente e não pode ser desfeita. Todos os itens, entregas e registros financeiros deste pedido serão apagados.</div>
+    <div class="confirm-desc" id="confirm-desc">Esta ação é permanente e não pode ser desfeita.</div>
     <div class="confirm-actions">
       <button class="btn btn-ghost" onclick="closeModal('confirm-modal')">Cancelar</button>
       <button class="btn btn-danger" onclick="confirmarExclusao()" style="background:var(--r);color:white;border:none">Sim, excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOVO: MODAL PAGAMENTOS -->
+<div class="modal-overlay" id="pagamentos-modal">
+  <div class="modal-box" style="max-width:620px">
+    <div class="modal-header">
+      <div class="modal-title" id="pgto-modal-title">💳 Pagamentos</div>
+      <button class="modal-close" onclick="closeModal('pagamentos-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Resumo do pedido -->
+      <div id="pgto-resumo" style="background:var(--cream);border-radius:10px;padding:14px 16px;margin-bottom:18px;border:1px solid var(--tan)"></div>
+
+      <!-- Histórico de pagamentos -->
+      <div class="section-label" style="margin-bottom:10px">Histórico de pagamentos</div>
+      <div id="pgto-lista"></div>
+
+      <!-- Saldo -->
+      <div id="pgto-saldo-box" class="saldo-box saldo-devendo" style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:500">Saldo restante</span>
+        <span id="pgto-saldo-val" style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--terra)">R$ 0,00</span>
+      </div>
+
+      <!-- Formulário novo pagamento -->
+      <div style="margin-top:20px;padding-top:18px;border-top:2px solid var(--tan)">
+        <div class="section-label" style="margin-bottom:12px">Registrar novo pagamento</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Valor (R$) *</label>
+            <input type="number" step="0.01" class="form-input" id="pgto-valor" placeholder="0,00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data *</label>
+            <input type="date" class="form-input" id="pgto-data">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Forma de pagamento</label>
+            <select class="form-select" id="pgto-forma">
+              <option value="">Selecionar...</option>
+              <option>PIX</option><option>Boleto</option><option>TED</option><option>Cartão</option><option>Cheque</option><option>Dinheiro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Observação</label>
+            <input type="text" class="form-input" id="pgto-obs" placeholder="Ex: Parcela 2 de 3">
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:4px">
+          <button class="btn btn-green btn-sm" onclick="salvarPagamento()" style="width:auto;padding:8px 20px">✓ Registrar pagamento</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('pagamentos-modal')">Fechar</button>
     </div>
   </div>
 </div>
@@ -661,15 +569,15 @@ textarea.form-input{resize:vertical;min-height:60px}
 <script>
 const SUPA_URL = 'https://ddbrnodfesnqiofpurnk.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkYnJub2RmZXNucWlvZnB1cm5rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MjE4ODYsImV4cCI6MjA4ODk5Nzg4Nn0.L1rhNjqPgE8tjXI3VgY_LtfCwix-PQdyt5M_BM4fJYc';
-
 const { createClient } = supabase;
 const sb = createClient(SUPA_URL, SUPA_KEY);
 
 let currentUser = null, empresaId = null;
-let allPedidos = [], allClientes = [], allEstoque = [], allEntregas = [], allFin = [];
+let allPedidos = [], allClientes = [], allEstoque = [], allEntregas = [], allFin = [], allPagamentos = [];
 let itemCount = 0, entregaFormCount = 0;
 let editCliente = null, editEstoque = null, editPedidoId = null;
-let pedidoParaExcluir = null; // FIX: variável para exclusão
+let pedidoParaExcluir = null;
+let pagamentoPedidoId = null; // pedido atual no modal de pagamentos
 
 // ===== AUTH =====
 async function doLogin() {
@@ -728,6 +636,7 @@ async function initApp(user) {
   }
   document.getElementById('p-data').value = new Date().toISOString().split('T')[0];
   document.getElementById('mov-data').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pgto-data').value = new Date().toISOString().split('T')[0];
   await loadAll();
 }
 
@@ -735,9 +644,9 @@ function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
 function showLogin() { document.getElementById('register-screen').style.display = 'none'; document.getElementById('auth-screen').style.display = 'flex'; }
 function showRegister() { document.getElementById('auth-screen').style.display = 'none'; document.getElementById('register-screen').style.display = 'flex'; }
 
-// ===== LOAD ALL =====
+// ===== LOAD =====
 async function loadAll() {
-  await Promise.all([loadPedidos(), loadClientes(), loadEstoque(), loadEntregas(), loadFinanceiro()]);
+  await Promise.all([loadPedidos(), loadClientes(), loadEstoque(), loadEntregas(), loadFinanceiro(), loadPagamentos()]);
   renderDashboard();
 }
 
@@ -774,6 +683,19 @@ async function loadFinanceiro() {
   renderFinanceiro();
 }
 
+async function loadPagamentos() {
+  const { data } = await sb.from('pagamentos').select('*').eq('empresa_id', empresaId).order('data_pagamento');
+  allPagamentos = data || [];
+}
+
+// Calcula total recebido de um pedido (entrada + pagamentos parciais)
+function totalRecebidoPedido(pedidoId) {
+  const fin = allFin.find(f => f.pedido_id === pedidoId);
+  const entrada = fin?.valor_entrada || 0;
+  const parciais = allPagamentos.filter(p => p.pedido_id === pedidoId).reduce((s, p) => s + (p.valor || 0), 0);
+  return entrada + parciais;
+}
+
 // ===== RENDER =====
 function fmt(v) { return 'R$ ' + Number(v||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 function fmtDate(d) { if (!d) return '—'; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; }
@@ -785,15 +707,20 @@ function renderDashboard() {
   const hoje = new Date(); const mesAtual = hoje.getMonth(); const anoAtual = hoje.getFullYear();
   const pedidosMes = allPedidos.filter(p => { const d = new Date(p.criado_em); return d.getMonth()===mesAtual && d.getFullYear()===anoAtual; });
   const fat = pedidosMes.reduce((s,p) => s + (p.financeiro_pedido?.[0]?.valor_total||0), 0);
-  const rec = allPedidos.filter(p=>p.status!=='cancelado').reduce((s,p) => { const f=p.financeiro_pedido?.[0]; return s+(f?(f.valor_total-f.valor_entrada):0); }, 0);
+  const totRecebido = allPedidos.filter(p=>p.status!=='cancelado').reduce((s,p) => {
+    const f = p.financeiro_pedido?.[0];
+    const vt = f?.valor_total || 0;
+    const rec = totalRecebidoPedido(p.id);
+    return s + Math.max(0, vt - rec);
+  }, 0);
   const prod = allPedidos.filter(p=>p.status==='em_producao').length;
   const semana = new Date(hoje); semana.setDate(hoje.getDate()+7);
   const entSemana = allEntregas.filter(e => { const d = new Date(e.data_prevista); return e.status==='pendente' && d>=hoje && d<=semana; }).length;
 
   document.getElementById('m-fat').textContent = fmt(fat);
   document.getElementById('m-fat-sub').textContent = `${pedidosMes.length} pedidos este mês`;
-  document.getElementById('m-rec').textContent = fmt(rec);
-  document.getElementById('m-rec-sub').textContent = `${allPedidos.filter(p=>p.status!=='cancelado'&&p.status!=='finalizado'&&(p.financeiro_pedido?.[0]?.valor_total||0)>(p.financeiro_pedido?.[0]?.valor_entrada||0)).length} pedidos com saldo`;
+  document.getElementById('m-rec').textContent = fmt(totRecebido);
+  document.getElementById('m-rec-sub').textContent = `${allPedidos.filter(p=>p.status!=='cancelado'&&p.status!=='finalizado').length} pedidos em aberto`;
   document.getElementById('m-prod').textContent = prod;
   document.getElementById('m-prod-sub').textContent = 'pedidos em produção';
   document.getElementById('m-ent').textContent = entSemana;
@@ -802,8 +729,13 @@ function renderDashboard() {
   const alerts = [];
   const atrasados = allPedidos.filter(p=>p.prazo_entrega&&new Date(p.prazo_entrega)<hoje&&p.status!=='finalizado'&&p.status!=='cancelado');
   if (atrasados.length) alerts.push(`<div class="alert-pill ap-danger"><div class="dot"></div>${atrasados.length} pedido(s) atrasado(s)</div>`);
-  const saldos = allPedidos.filter(p=>p.status!=='cancelado'&&(p.financeiro_pedido?.[0]?.valor_total||0)>(p.financeiro_pedido?.[0]?.valor_entrada||0));
-  if (saldos.length) alerts.push(`<div class="alert-pill ap-warning"><div class="dot"></div>${saldos.length} saldo(s) pendente(s)</div>`);
+  const comSaldo = allPedidos.filter(p => {
+    if (p.status==='cancelado'||p.status==='finalizado') return false;
+    const f = p.financeiro_pedido?.[0];
+    const vt = f?.valor_total || 0;
+    return vt > totalRecebidoPedido(p.id);
+  });
+  if (comSaldo.length) alerts.push(`<div class="alert-pill ap-warning"><div class="dot"></div>${comSaldo.length} pedido(s) com saldo pendente</div>`);
   const amanha = new Date(hoje); amanha.setDate(hoje.getDate()+1);
   const entAmanha = allEntregas.filter(e=>e.status==='pendente'&&e.data_prevista===amanha.toISOString().split('T')[0]);
   if (entAmanha.length) alerts.push(`<div class="alert-pill ap-info"><div class="dot"></div>${entAmanha.length} entrega(s) amanhã</div>`);
@@ -818,10 +750,7 @@ function renderDashboard() {
   document.getElementById('dash-pedidos-list').innerHTML = recentes.length ? `<div style="padding:4px 18px">${recentes.map(p=>`
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--tan)">
       <span style="background:var(--cream);color:var(--brown);border-radius:5px;padding:3px 7px;font-size:11px;font-weight:600;border:1px solid var(--tan)">#${String(p.numero).padStart(4,'0')}</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.clientes?.razao_social||'—'}</div>
-        <div style="font-size:11px;color:var(--kraft)">${fmtDate(p.prazo_entrega)}</div>
-      </div>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.clientes?.razao_social||'—'}</div><div style="font-size:11px;color:var(--kraft)">${fmtDate(p.prazo_entrega)}</div></div>
       <span class="status ${statusClass[p.status]||''}">${statusLabels[p.status]||p.status}</span>
     </div>`).join('')}</div>` : '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido ainda</div></div>';
 
@@ -840,34 +769,34 @@ function renderDashboard() {
   }</tbody></table></div>` : '<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Sem entregas pendentes</div></div>';
 
   const totFat = allFin.reduce((s,f)=>s+(f.valor_total||0),0);
-  const totRec = allFin.reduce((s,f)=>s+(f.valor_entrada||0),0);
-  const totPend = totFat - totRec;
+  const totRec2 = allFin.reduce((s,f)=>s + totalRecebidoPedido(f.pedido_id), 0);
   document.getElementById('dash-fin').innerHTML = `
     <div class="fin-row"><span class="fin-lbl">Faturado</span><span class="fin-val">${fmt(totFat)}</span></div>
-    <div class="fin-row"><span class="fin-lbl">Recebido</span><span class="fin-val" style="color:var(--forest)">${fmt(totRec)}</span></div>
-    <div class="fin-total"><span class="fin-total-lbl">Saldo a receber</span><span class="fin-total-val">${fmt(totPend)}</span></div>`;
+    <div class="fin-row"><span class="fin-lbl">Recebido</span><span class="fin-val" style="color:var(--forest)">${fmt(totRec2)}</span></div>
+    <div class="fin-total"><span class="fin-total-lbl">Saldo a receber</span><span class="fin-total-val">${fmt(totFat-totRec2)}</span></div>`;
 }
 
 function renderPedidos(list) {
   const dados = list || allPedidos;
   const tb = document.getElementById('pedidos-tbody');
-  if (!dados.length) { tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido encontrado</div></div></td></tr>'; return; }
+  if (!dados.length) { tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido encontrado</div></div></td></tr>'; return; }
   tb.innerHTML = dados.map(p => {
     const f = p.financeiro_pedido?.[0];
-    // Calcular total dos itens como fallback se financeiro estiver zerado
     const totalItens = (p.itens_pedido||[]).reduce((s,it) => s + (it.valor_total || (it.quantidade * it.valor_unitario) || 0), 0);
     const total = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalItens;
-    const entrada = f?.valor_entrada || 0;
-    const saldo = total - entrada;
+    const recebido = totalRecebidoPedido(p.id);
+    const saldo = total - recebido;
     return `<tr>
       <td style="font-weight:600;color:var(--terra)">#${String(p.numero).padStart(4,'0')}</td>
       <td>${p.clientes?.razao_social||'—'}</td>
       <td>${fmtDate(p.data_pedido)}</td>
       <td>${fmtDate(p.prazo_entrega)}</td>
       <td>${fmt(total)}</td>
+      <td style="color:var(--forest);font-weight:500">${fmt(recebido)}</td>
       <td style="font-weight:600;color:${saldo>0?'#D63B2F':'#2D5A27'}">${fmt(saldo)}</td>
       <td><span class="status ${statusClass[p.status]||''}">${statusLabels[p.status]||p.status}</span></td>
       <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="abrirPagamentos('${p.id}')" style="margin-right:4px" title="Pagamentos">💳</button>
         <button class="btn btn-ghost btn-sm" onclick="editarPedido('${p.id}')" style="margin-right:4px" title="Editar">✏️</button>
         <button class="btn btn-ghost btn-sm" onclick="gerarPDFPedido('${p.id}')" style="margin-right:4px" title="PDF">📄</button>
         <button class="btn btn-ghost btn-sm" onclick="solicitarExclusao('${p.id}','${String(p.numero).padStart(4,'0')}','${(p.clientes?.razao_social||'').replace(/'/g,' ')}')" title="Excluir" style="color:#D63B2F;border-color:#f5bfbf">🗑️</button>
@@ -876,32 +805,120 @@ function renderPedidos(list) {
   }).join('');
 }
 
-// ===== FIX: EXCLUSÃO DE PEDIDO =====
-function solicitarExclusao(id, numero, cliente) {
-  pedidoParaExcluir = id;
-  document.getElementById('confirm-desc').textContent = `Você está prestes a excluir o pedido #${numero} de ${cliente}. Esta ação é permanente e não pode ser desfeita.`;
-  openModal('confirm-modal');
+// ===== PAGAMENTOS =====
+async function abrirPagamentos(pedidoId) {
+  pagamentoPedidoId = pedidoId;
+  const pedido = allPedidos.find(p => p.id === pedidoId);
+  const f = pedido?.financeiro_pedido?.[0];
+  const totalItens = (pedido?.itens_pedido||[]).reduce((s,it) => s + (it.valor_total || (it.quantidade * it.valor_unitario) || 0), 0);
+  const valorTotal = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalItens;
+  const cliente = allClientes.find(c => c.id === pedido?.cliente_id);
+
+  document.getElementById('pgto-modal-title').textContent = `💳 Pagamentos — Pedido #${String(pedido.numero).padStart(4,'0')}`;
+  document.getElementById('pgto-data').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pgto-valor').value = '';
+  document.getElementById('pgto-forma').value = '';
+  document.getElementById('pgto-obs').value = '';
+
+  // Resumo
+  document.getElementById('pgto-resumo').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-weight:600;font-size:14px">${cliente?.razao_social||'—'}</div><div style="font-size:11px;color:var(--kraft)">Pedido #${String(pedido.numero).padStart(4,'0')} · ${fmtDate(pedido.data_pedido)}</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:var(--kraft)">Valor total</div><div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--dark)">${fmt(valorTotal)}</div></div>
+    </div>`;
+
+  await renderPagamentosModal(pedidoId, valorTotal, f?.valor_entrada || 0);
+  openModal('pagamentos-modal');
 }
 
-async function confirmarExclusao() {
-  if (!pedidoParaExcluir) return;
-  const btn = document.querySelector('#confirm-modal .btn-danger');
-  btn.textContent = 'Excluindo...'; btn.disabled = true;
-  try {
-    // Apagar registros relacionados primeiro (cascade)
-    await sb.from('itens_pedido').delete().eq('pedido_id', pedidoParaExcluir);
-    await sb.from('entregas').delete().eq('pedido_id', pedidoParaExcluir);
-    await sb.from('financeiro_pedido').delete().eq('pedido_id', pedidoParaExcluir);
-    await sb.from('pedidos').delete().eq('id', pedidoParaExcluir);
-    showToast('Pedido excluído com sucesso!', 'success');
-    closeModal('confirm-modal');
-    pedidoParaExcluir = null;
-    await loadAll();
-  } catch(e) {
-    showToast('Erro ao excluir: ' + e.message, 'error');
-  } finally {
-    btn.textContent = 'Sim, excluir'; btn.disabled = false;
+async function renderPagamentosModal(pedidoId, valorTotal, entrada) {
+  const { data: pgtos } = await sb.from('pagamentos').select('*').eq('pedido_id', pedidoId).order('data_pagamento');
+  const lista = document.getElementById('pgto-lista');
+
+  let html = '';
+  // Mostrar entrada como primeiro item se existir
+  if (entrada > 0) {
+    html += `<div class="pgto-item">
+      <div class="pgto-info">
+        <span class="pgto-valor">${fmt(entrada)}</span>
+        <span class="pgto-meta">Entrada inicial · Registrada no pedido</span>
+      </div>
+      <span style="font-size:11px;background:#edf7f0;color:#1a4d25;padding:2px 8px;border-radius:10px;border:1px solid #a8d9b5">entrada</span>
+    </div>`;
   }
+
+  if (pgtos && pgtos.length > 0) {
+    html += pgtos.map(p => `
+      <div class="pgto-item">
+        <div class="pgto-info">
+          <span class="pgto-valor">${fmt(p.valor)}</span>
+          <span class="pgto-meta">${fmtDate(p.data_pagamento)}${p.forma_pagamento ? ' · ' + p.forma_pagamento : ''}${p.observacao ? ' · ' + p.observacao : ''}</span>
+        </div>
+        <button class="pgto-del" onclick="excluirPagamento('${p.id}','${pedidoId}',${valorTotal},${entrada})" title="Excluir">×</button>
+      </div>`).join('');
+  }
+
+  lista.innerHTML = html || `<div style="text-align:center;padding:20px;color:var(--kraft);font-size:13px">Nenhum pagamento registrado ainda</div>`;
+
+  // Calcular saldo
+  const totalPago = entrada + (pgtos||[]).reduce((s,p) => s + p.valor, 0);
+  const saldo = valorTotal - totalPago;
+  const saldoBox = document.getElementById('pgto-saldo-box');
+  const saldoVal = document.getElementById('pgto-saldo-val');
+
+  saldoVal.textContent = fmt(Math.abs(saldo));
+  if (saldo <= 0) {
+    saldoBox.className = 'saldo-box saldo-quitado';
+    saldoVal.style.color = 'var(--forest)';
+    saldoVal.textContent = '✓ Quitado';
+  } else {
+    saldoBox.className = 'saldo-box saldo-devendo';
+    saldoVal.style.color = 'var(--terra)';
+  }
+}
+
+async function salvarPagamento() {
+  const valor = parseFloat(document.getElementById('pgto-valor').value);
+  const data = document.getElementById('pgto-data').value;
+  if (!valor || valor <= 0) { showToast('Informe um valor válido', 'error'); return; }
+  if (!data) { showToast('Informe a data do pagamento', 'error'); return; }
+
+  const { error } = await sb.from('pagamentos').insert({
+    empresa_id: empresaId,
+    pedido_id: pagamentoPedidoId,
+    valor,
+    data_pagamento: data,
+    forma_pagamento: document.getElementById('pgto-forma').value || null,
+    observacao: document.getElementById('pgto-obs').value || null,
+  });
+
+  if (error) { showToast('Erro ao salvar: ' + error.message, 'error'); return; }
+
+  showToast('Pagamento registrado!', 'success');
+  document.getElementById('pgto-valor').value = '';
+  document.getElementById('pgto-obs').value = '';
+
+  // Recarregar pagamentos
+  await loadPagamentos();
+  const pedido = allPedidos.find(p => p.id === pagamentoPedidoId);
+  const f = pedido?.financeiro_pedido?.[0];
+  const totalItens = (pedido?.itens_pedido||[]).reduce((s,it) => s + (it.valor_total || (it.quantidade * it.valor_unitario) || 0), 0);
+  const valorTotal = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalItens;
+  await renderPagamentosModal(pagamentoPedidoId, valorTotal, f?.valor_entrada || 0);
+  renderPedidos();
+  renderFinanceiro();
+  renderDashboard();
+}
+
+async function excluirPagamento(id, pedidoId, valorTotal, entrada) {
+  if (!confirm('Excluir este pagamento?')) return;
+  await sb.from('pagamentos').delete().eq('id', id);
+  await loadPagamentos();
+  await renderPagamentosModal(pedidoId, valorTotal, entrada);
+  renderPedidos();
+  renderFinanceiro();
+  renderDashboard();
+  showToast('Pagamento removido', 'warning');
 }
 
 function renderClientes(list) {
@@ -951,10 +968,8 @@ function renderEstoque() {
     const sc = ok ? 's-ok' : (e.quantidade===0 ? 's-crit' : 's-baixo');
     const sl = ok ? 'Normal' : (e.quantidade===0 ? 'Crítico' : 'Baixo');
     return `<tr>
-      <td style="font-weight:500">${e.nome}</td>
-      <td>${e.quantidade}</td><td>${e.unidade}</td><td>${e.estoque_minimo}</td>
-      <td>${fmt(e.custo_unitario)}</td>
-      <td>${fmt(e.quantidade * e.custo_unitario)}</td>
+      <td style="font-weight:500">${e.nome}</td><td>${e.quantidade}</td><td>${e.unidade}</td><td>${e.estoque_minimo}</td>
+      <td>${fmt(e.custo_unitario)}</td><td>${fmt(e.quantidade * e.custo_unitario)}</td>
       <td><span class="status ${sc}">${sl}</span></td>
       <td><button class="btn btn-ghost btn-sm" onclick="editarEstoque('${e.id}')">✏️</button></td>
     </tr>`;
@@ -966,19 +981,21 @@ function renderFinanceiro() {
   let totFat=0, totRec=0, totCusto=0;
   if (!allFin.length) { tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">💰</div><div class="empty-text">Nenhum lançamento</div></div></td></tr>'; return; }
   tb.innerHTML = allFin.map(f => {
-    const saldo = (f.valor_total||0) - (f.valor_entrada||0);
+    const recebido = totalRecebidoPedido(f.pedido_id);
+    const saldo = (f.valor_total||0) - recebido;
     const lucro = (f.valor_total||0) - (f.custo_total||0);
     const margem = f.valor_total > 0 ? ((lucro/f.valor_total)*100).toFixed(1) : 0;
-    totFat += f.valor_total||0; totRec += f.valor_entrada||0; totCusto += f.custo_total||0;
+    totFat += f.valor_total||0; totRec += recebido; totCusto += f.custo_total||0;
     return `<tr>
       <td style="color:var(--terra);font-weight:600">#${String(f.pedidos?.numero||0).padStart(4,'0')}</td>
       <td>${f.pedidos?.clientes?.razao_social||'—'}</td>
-      <td>${fmt(f.valor_total)}</td><td>${fmt(f.valor_entrada)}</td>
-      <td>${f.forma_pagamento||'—'}</td>
+      <td>${fmt(f.valor_total)}</td>
+      <td style="color:var(--forest);font-weight:500">${fmt(recebido)}</td>
       <td style="font-weight:600;color:${saldo>0?'#D63B2F':'#2D5A27'}">${fmt(saldo)}</td>
       <td>${fmt(f.custo_total)}</td>
       <td style="color:var(--forest)">${fmt(Math.max(0,lucro))}</td>
       <td>${margem}%</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="abrirPagamentos('${f.pedido_id}')" title="Ver pagamentos">💳</button></td>
     </tr>`;
   }).join('');
   document.getElementById('fin-total').textContent = fmt(totFat);
@@ -1004,19 +1021,17 @@ function filtrarClientes() {
   renderClientes(allClientes.filter(c => (c.razao_social||'').toLowerCase().includes(busca) || (c.responsavel||'').toLowerCase().includes(busca)));
 }
 
-// ===== POPULATE SELECTS =====
+// ===== SELECTS =====
 function populateClienteSelect() {
   const sel = document.getElementById('p-cliente');
   const cur = sel.value;
   sel.innerHTML = '<option value="">Selecionar cliente...</option>' + allClientes.map(c=>`<option value="${c.id}">${c.razao_social}</option>`).join('');
   if (cur) sel.value = cur;
 }
-
 function populatePdfSelect() {
   const sel = document.getElementById('pdf-pedido-select');
   sel.innerHTML = '<option value="">Selecionar pedido...</option>' + allPedidos.map(p=>`<option value="${p.id}">#${String(p.numero).padStart(4,'0')} — ${p.clientes?.razao_social||'?'}</option>`).join('');
 }
-
 function populateMovMaterial() {
   const sel = document.getElementById('mov-material');
   sel.innerHTML = '<option value="">Selecionar material...</option>' + allEstoque.map(e=>`<option value="${e.id}">${e.nome} (${e.quantidade} ${e.unidade})</option>`).join('');
@@ -1037,12 +1052,7 @@ function addItem() {
     <td><button class="remove-item" onclick="removeItem(${itemCount})">×</button></td>`;
   document.getElementById('itens-tbody').appendChild(tr);
 }
-
-function removeItem(id) {
-  document.getElementById('item-row-'+id)?.remove();
-  calcTotal();
-}
-
+function removeItem(id) { document.getElementById('item-row-'+id)?.remove(); calcTotal(); }
 function calcTotal() {
   let total = 0;
   for (let i = 1; i <= itemCount; i++) {
@@ -1056,14 +1066,12 @@ function calcTotal() {
   document.getElementById('total-display').textContent = fmt(total);
   calcSaldo();
 }
-
 function calcSaldo() {
   const totalText = document.getElementById('total-display').textContent;
   const total = parseFloat(totalText.replace('R$ ','').replace(/\./g,'').replace(',','.'))||0;
   const entrada = parseFloat(document.getElementById('p-entrada').value)||0;
   document.getElementById('p-saldo').value = fmt(total - entrada);
 }
-
 function addEntregaForm() {
   entregaFormCount++;
   const div = document.createElement('div');
@@ -1079,7 +1087,6 @@ function addEntregaForm() {
 async function salvarPedido() {
   const clienteId = document.getElementById('p-cliente').value;
   if (!clienteId) { showToast('Selecione um cliente', 'error'); return; }
-
   const itens = [];
   for (let i = 1; i <= itemCount; i++) {
     const modeloEl = document.getElementById('it-modelo-'+i);
@@ -1088,32 +1095,13 @@ async function salvarPedido() {
     if (!modelo) continue;
     const qtd = parseFloat(document.getElementById('it-qtd-'+i)?.value)||0;
     const preco = parseFloat(document.getElementById('it-preco-'+i)?.value)||0;
-    itens.push({
-      empresa_id: empresaId,
-      modelo,
-      cor: document.getElementById('it-cor-'+i)?.value||'',
-      logotipo: document.getElementById('it-logo-'+i)?.value||'',
-      quantidade: qtd,
-      valor_unitario: preco,
-      valor_total: qtd * preco,
-    });
+    itens.push({ empresa_id: empresaId, modelo, cor: document.getElementById('it-cor-'+i)?.value||'', logotipo: document.getElementById('it-logo-'+i)?.value||'', quantidade: qtd, valor_unitario: preco, valor_total: qtd * preco });
   }
   if (!itens.length) { showToast('Adicione pelo menos um item', 'error'); return; }
-
   const totalVal = itens.reduce((s,it)=>s+it.valor_total, 0);
-
-  const pedidoData = {
-    empresa_id: empresaId,
-    cliente_id: clienteId,
-    data_pedido: document.getElementById('p-data').value,
-    prazo_entrega: document.getElementById('p-prazo').value || null,
-    status: document.getElementById('p-status').value,
-    observacoes: document.getElementById('p-obs').value,
-  };
-
+  const pedidoData = { empresa_id: empresaId, cliente_id: clienteId, data_pedido: document.getElementById('p-data').value, prazo_entrega: document.getElementById('p-prazo').value || null, status: document.getElementById('p-status').value, observacoes: document.getElementById('p-obs').value };
   const btnSalvar = document.getElementById('btn-salvar-pedido');
   btnSalvar.textContent = 'Salvando...'; btnSalvar.disabled = true;
-
   try {
     let pedidoId = editPedidoId;
     if (editPedidoId) {
@@ -1125,33 +1113,11 @@ async function salvarPedido() {
       if (errIns) throw new Error('Erro ao criar pedido: ' + errIns.message);
       pedidoId = data?.id;
     }
-
     if (!pedidoId) throw new Error('ID do pedido não retornado');
-
-    // valor_total é coluna gerada no banco (calculada automaticamente) — não enviar
-    const itensParaSalvar = itens.map(it => ({
-      empresa_id: String(empresaId),
-      pedido_id: String(pedidoId),
-      modelo: String(it.modelo),
-      cor: String(it.cor||''),
-      logotipo: String(it.logotipo||''),
-      quantidade: Number(it.quantidade),
-      valor_unitario: Number(it.valor_unitario),
-    }));
-
+    const itensParaSalvar = itens.map(it => ({ empresa_id: String(empresaId), pedido_id: String(pedidoId), modelo: String(it.modelo), cor: String(it.cor||''), logotipo: String(it.logotipo||''), quantidade: Number(it.quantidade), valor_unitario: Number(it.valor_unitario) }));
     const { error: errItens } = await sb.from('itens_pedido').insert(itensParaSalvar);
     if (errItens) throw new Error('Erro ao salvar itens: ' + errItens.message);
-
-    const finData = {
-      empresa_id: empresaId,
-      pedido_id: pedidoId,
-      valor_total: totalVal,
-      valor_entrada: parseFloat(document.getElementById('p-entrada').value)||0,
-      data_entrada: document.getElementById('p-data-entrada').value||null,
-      forma_pagamento: document.getElementById('p-forma').value||null,
-      custo_total: parseFloat(document.getElementById('p-custo').value)||0,
-    };
-    // Verificar se já existe registro financeiro para este pedido
+    const finData = { empresa_id: empresaId, pedido_id: pedidoId, valor_total: totalVal, valor_entrada: parseFloat(document.getElementById('p-entrada').value)||0, data_entrada: document.getElementById('p-data-entrada').value||null, forma_pagamento: document.getElementById('p-forma').value||null, custo_total: parseFloat(document.getElementById('p-custo').value)||0 };
     const { data: finExist } = await sb.from('financeiro_pedido').select('id').eq('pedido_id', pedidoId).maybeSingle();
     if (finExist) {
       const { error: errFin } = await sb.from('financeiro_pedido').update(finData).eq('pedido_id', pedidoId);
@@ -1160,20 +1126,15 @@ async function salvarPedido() {
       const { error: errFin } = await sb.from('financeiro_pedido').insert(finData);
       if (errFin) throw new Error('Erro ao salvar financeiro: ' + errFin.message);
     }
-
     for (let i = 1; i <= entregaFormCount; i++) {
       const qtdE = parseInt(document.getElementById('ent-qtd-'+i)?.value)||0;
       const dataE = document.getElementById('ent-data-'+i)?.value;
-      if (qtdE && dataE) {
-        await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE });
-      }
+      if (qtdE && dataE) await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE });
     }
-
     showToast(editPedidoId ? 'Pedido atualizado!' : 'Pedido criado com sucesso!', 'success');
     resetPedidoForm();
     await loadAll();
     nav('pedidos');
-
   } catch(e) {
     console.error('Erro ao salvar pedido:', e);
     showToast('Erro: ' + e.message, 'error');
@@ -1211,8 +1172,6 @@ async function editarPedido(id) {
   document.getElementById('p-data').value = pedido.data_pedido;
   document.getElementById('p-prazo').value = pedido.prazo_entrega||'';
   document.getElementById('p-obs').value = pedido.observacoes||'';
-
-  // Recarregar financeiro direto do banco para garantir dados atuais
   const { data: finRows } = await sb.from('financeiro_pedido').select('*').eq('pedido_id', id);
   const f = finRows?.[0] || pedido.financeiro_pedido?.[0];
   if (f) {
@@ -1226,7 +1185,6 @@ async function editarPedido(id) {
     document.getElementById('p-forma').value = '';
     document.getElementById('p-custo').value = '';
   }
-
   document.getElementById('itens-tbody').innerHTML = '';
   itemCount = 0;
   const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', id);
@@ -1249,6 +1207,33 @@ async function editarPedido(id) {
   nav('novo-pedido');
 }
 
+// ===== EXCLUSÃO =====
+function solicitarExclusao(id, numero, cliente) {
+  pedidoParaExcluir = id;
+  document.getElementById('confirm-desc').textContent = `Você está prestes a excluir o pedido #${numero} de ${cliente}. Esta ação é permanente e não pode ser desfeita.`;
+  openModal('confirm-modal');
+}
+async function confirmarExclusao() {
+  if (!pedidoParaExcluir) return;
+  const btn = document.querySelector('#confirm-modal .btn-danger');
+  btn.textContent = 'Excluindo...'; btn.disabled = true;
+  try {
+    await sb.from('pagamentos').delete().eq('pedido_id', pedidoParaExcluir);
+    await sb.from('itens_pedido').delete().eq('pedido_id', pedidoParaExcluir);
+    await sb.from('entregas').delete().eq('pedido_id', pedidoParaExcluir);
+    await sb.from('financeiro_pedido').delete().eq('pedido_id', pedidoParaExcluir);
+    await sb.from('pedidos').delete().eq('id', pedidoParaExcluir);
+    showToast('Pedido excluído com sucesso!', 'success');
+    closeModal('confirm-modal');
+    pedidoParaExcluir = null;
+    await loadAll();
+  } catch(e) {
+    showToast('Erro ao excluir: ' + e.message, 'error');
+  } finally {
+    btn.textContent = 'Sim, excluir'; btn.disabled = false;
+  }
+}
+
 // ===== CLIENTE =====
 async function salvarCliente() {
   const razao = document.getElementById('c-razao').value;
@@ -1260,7 +1245,6 @@ async function salvarCliente() {
   closeModal('cliente-modal');
   await loadClientes();
 }
-
 function editarCliente(id) {
   const c = allClientes.find(x=>x.id===id);
   if (!c) return;
@@ -1286,7 +1270,6 @@ async function salvarEstoque() {
   closeModal('estoque-modal');
   await loadEstoque();
 }
-
 function editarEstoque(id) {
   const e = allEstoque.find(x=>x.id===id);
   if (!e) return;
@@ -1299,7 +1282,6 @@ function editarEstoque(id) {
   document.getElementById('e-min').value = e.estoque_minimo;
   openModal('estoque-modal');
 }
-
 async function salvarMovimentacao() {
   const estoqueId = document.getElementById('mov-material').value;
   const tipo = document.getElementById('mov-tipo').value;
@@ -1325,7 +1307,6 @@ function atualizarEntrega(id, pedidoId, status, dataReal) {
   document.getElementById('es-data').value = dataReal;
   openModal('entrega-status-modal');
 }
-
 async function salvarStatusEntrega() {
   const id = document.getElementById('es-id').value;
   const pedidoId = document.getElementById('es-pedido-id').value;
@@ -1345,7 +1326,6 @@ async function salvarStatusEntrega() {
 }
 
 // ===== PDF =====
-// FIX: calcular valor_total dos itens inline (qtd * preco) caso o campo venha nulo do banco
 async function loadPdfPreview() {
   const id = document.getElementById('pdf-pedido-select').value;
   if (!id) { document.getElementById('pdf-preview-area').innerHTML = ''; return; }
@@ -1354,17 +1334,11 @@ async function loadPdfPreview() {
   const { data: entregas } = await sb.from('entregas').select('*').eq('pedido_id', id);
   const f = pedido?.financeiro_pedido?.[0];
   const cliente = allClientes.find(c=>c.id===pedido?.cliente_id);
-
-  // FIX: recalcular valor_total de cada item e o total geral a partir dos itens
-  const itensComTotal = (itens||[]).map(it => ({
-    ...it,
-    valor_total_calc: it.valor_total || (it.quantidade * it.valor_unitario)
-  }));
+  const itensComTotal = (itens||[]).map(it => ({ ...it, valor_total_calc: it.valor_total || (it.quantidade * it.valor_unitario) }));
   const totalCalculado = itensComTotal.reduce((s, it) => s + it.valor_total_calc, 0);
-  // Usar o valor do financeiro_pedido se existir, senão usar o calculado dos itens
   const valorTotalExibir = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalCalculado;
-  const saldo = valorTotalExibir - (f?.valor_entrada||0);
-
+  const recebido = totalRecebidoPedido(id);
+  const saldo = valorTotalExibir - recebido;
   document.getElementById('pdf-preview-area').innerHTML = `
     <div class="pdf-prev">
       <div class="pdf-logo-row">
@@ -1389,7 +1363,7 @@ async function loadPdfPreview() {
       ${itensComTotal.map(it=>`<div class="pdf-item-row"><span><b>${it.modelo}</b> · ${it.cor||''} · ${it.logotipo||''}</span><span>${it.quantidade} × ${fmt(it.valor_unitario)} = ${fmt(it.valor_total_calc)}</span></div>`).join('')}
       ${entregas?.length ? `<div class="pdf-sec-title" style="margin-top:12px">Entregas</div>${entregas.map(e=>`<div class="pdf-row"><span class="pdf-lbl">${fmtDate(e.data_prevista)}</span><span class="pdf-val">${e.quantidade} un — ${e.status}</span></div>`).join('')}` : ''}
       <div class="fin-total"><span class="fin-total-lbl">Valor total</span><span class="fin-total-val">${fmt(valorTotalExibir)}</span></div>
-      <div class="fin-saldo"><span style="font-size:12px;color:#7a3010;font-weight:500">Entrada paga: ${fmt(f?.valor_entrada)}</span><span style="font-size:14px;color:var(--terra);font-weight:700">Saldo: ${fmt(saldo)}</span></div>
+      <div class="fin-saldo"><span style="font-size:12px;color:#7a3010;font-weight:500">Total recebido: ${fmt(recebido)}</span><span style="font-size:14px;color:var(--terra);font-weight:700">Saldo: ${fmt(saldo)}</span></div>
       <div style="margin-top:12px;font-size:10px;color:var(--kraft);line-height:1.6"><b>Termos:</b> Prazo de produção conforme acordado. Entrega condicionada ao pagamento do saldo pendente.</div>
     </div>`;
 }
@@ -1405,158 +1379,73 @@ async function gerarPDF() {
   const id = document.getElementById('pdf-pedido-select').value;
   const pedido = allPedidos.find(p=>p.id===id);
   if (!pedido) { showToast('Selecione um pedido', 'error'); return; }
-
   const f = pedido?.financeiro_pedido?.[0];
   const cliente = allClientes.find(c=>c.id===pedido?.cliente_id);
   const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', id);
   const { data: entregas } = await sb.from('entregas').select('*').eq('pedido_id', id).order('data_prevista');
-
-  const itensComTotal = (itens||[]).map(it => ({
-    ...it,
-    valor_total_calc: it.valor_total || (it.quantidade * it.valor_unitario)
-  }));
+  const itensComTotal = (itens||[]).map(it => ({ ...it, valor_total_calc: it.valor_total || (it.quantidade * it.valor_unitario) }));
   const totalCalculado = itensComTotal.reduce((s, it) => s + it.valor_total_calc, 0);
   const valorTotal = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalCalculado;
-  const entrada = f?.valor_entrada || 0;
-  const saldo = valorTotal - entrada;
-
+  const recebido = totalRecebidoPedido(id);
+  const saldo = valorTotal - recebido;
   const doc = new jsPDF();
   let y = 20;
-
-  // === CABEÇALHO ===
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18); doc.text('Ateliê Studio', 20, y);
   doc.setFontSize(13); doc.text(`PEDIDO #${String(pedido.numero).padStart(4,'0')}`, 190, y, { align: 'right' });
   y += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9); doc.setTextColor(150);
-  doc.text('Caixas cartonadas sob encomenda', 20, y);
-  doc.setTextColor(0);
-  y += 8;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(150);
+  doc.text('Caixas cartonadas sob encomenda', 20, y); doc.setTextColor(0); y += 8;
   doc.setLineWidth(0.5); doc.line(20, y, 190, y); y += 10;
-
-  // === CLIENTE + DATAS ===
   doc.setFontSize(9); doc.setTextColor(150);
   doc.text('CLIENTE', 20, y); doc.text('DATAS', 110, y); y += 5;
   doc.setTextColor(0); doc.setFontSize(10);
-
-  const linhasCliente = [
-    ['Empresa', cliente?.razao_social||'—'],
-    ['CNPJ', cliente?.cnpj||'—'],
-    ['Contato', cliente?.responsavel||'—'],
-    ['WhatsApp', cliente?.telefone||'—'],
-  ];
-  const linhasDatas = [
-    ['Pedido em', fmtDate(pedido.data_pedido)],
-    ['Prazo de entrega', fmtDate(pedido.prazo_entrega)],
-    ['Forma de pgto', f?.forma_pagamento||'—'],
-  ];
+  const linhasCliente = [['Empresa', cliente?.razao_social||'—'],['CNPJ', cliente?.cnpj||'—'],['Contato', cliente?.responsavel||'—'],['WhatsApp', cliente?.telefone||'—']];
+  const linhasDatas = [['Pedido em', fmtDate(pedido.data_pedido)],['Prazo de entrega', fmtDate(pedido.prazo_entrega)],['Forma de pgto', f?.forma_pagamento||'—']];
   const maxLinhas = Math.max(linhasCliente.length, linhasDatas.length);
   for (let i = 0; i < maxLinhas; i++) {
-    if (linhasCliente[i]) {
-      doc.setFont('helvetica', 'normal'); doc.setTextColor(120);
-      doc.setFontSize(9); doc.text(linhasCliente[i][0], 20, y);
-      doc.setFont('helvetica', 'normal'); doc.setTextColor(0);
-      doc.setFontSize(10); doc.text(linhasCliente[i][1], 55, y);
-    }
-    if (linhasDatas[i]) {
-      doc.setFont('helvetica', 'normal'); doc.setTextColor(120);
-      doc.setFontSize(9); doc.text(linhasDatas[i][0], 110, y);
-      doc.setFont('helvetica', 'normal'); doc.setTextColor(0);
-      doc.setFontSize(10); doc.text(linhasDatas[i][1], 150, y);
-    }
+    if (linhasCliente[i]) { doc.setFont('helvetica','normal');doc.setTextColor(120);doc.setFontSize(9);doc.text(linhasCliente[i][0],20,y);doc.setTextColor(0);doc.setFontSize(10);doc.text(linhasCliente[i][1],55,y); }
+    if (linhasDatas[i]) { doc.setFont('helvetica','normal');doc.setTextColor(120);doc.setFontSize(9);doc.text(linhasDatas[i][0],110,y);doc.setTextColor(0);doc.setFontSize(10);doc.text(linhasDatas[i][1],150,y); }
     y += 7;
   }
-  y += 3;
-  doc.setLineWidth(0.3); doc.line(20, y, 190, y); y += 8;
-
-  // === ITENS ===
-  doc.setFontSize(9); doc.setTextColor(150);
-  doc.text('ITENS DO PEDIDO', 20, y); y += 6;
-
-  // Cabeçalho tabela itens
-  doc.setFillColor(245, 240, 232);
-  doc.rect(20, y-4, 170, 7, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setTextColor(0); doc.setFontSize(9);
-  doc.text('Modelo', 22, y);
-  doc.text('Cor', 80, y);
-  doc.text('Logotipo', 105, y);
-  doc.text('Qtd', 145, y, { align: 'right' });
-  doc.text('Unit.', 163, y, { align: 'right' });
-  doc.text('Total', 190, y, { align: 'right' });
+  y += 3; doc.setLineWidth(0.3); doc.line(20, y, 190, y); y += 8;
+  doc.setFontSize(9); doc.setTextColor(150); doc.text('ITENS DO PEDIDO', 20, y); y += 6;
+  doc.setFillColor(245,240,232); doc.rect(20,y-4,170,7,'F');
+  doc.setFont('helvetica','bold');doc.setTextColor(0);doc.setFontSize(9);
+  doc.text('Modelo',22,y);doc.text('Cor',80,y);doc.text('Logotipo',105,y);doc.text('Qtd',145,y,{align:'right'});doc.text('Unit.',163,y,{align:'right'});doc.text('Total',190,y,{align:'right'});
   y += 7;
-
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-  itensComTotal.forEach((it, idx) => {
-    if (idx % 2 === 0) { doc.setFillColor(252, 249, 245); doc.rect(20, y-4, 170, 7, 'F'); }
+  doc.setFont('helvetica','normal');doc.setFontSize(10);
+  itensComTotal.forEach((it,idx) => {
+    if (idx%2===0){doc.setFillColor(252,249,245);doc.rect(20,y-4,170,7,'F');}
     doc.setTextColor(0);
-    doc.text(String(it.modelo||'').substring(0,25), 22, y);
-    doc.text(String(it.cor||'').substring(0,12), 80, y);
-    doc.text(String(it.logotipo||'').substring(0,14), 105, y);
-    doc.text(String(it.quantidade), 145, y, { align: 'right' });
-    doc.text(fmt(it.valor_unitario), 163, y, { align: 'right' });
-    doc.setFont('helvetica', 'bold');
-    doc.text(fmt(it.valor_total_calc), 190, y, { align: 'right' });
-    doc.setFont('helvetica', 'normal');
-    y += 7;
+    doc.text(String(it.modelo||'').substring(0,25),22,y);doc.text(String(it.cor||'').substring(0,12),80,y);doc.text(String(it.logotipo||'').substring(0,14),105,y);
+    doc.text(String(it.quantidade),145,y,{align:'right'});doc.text(fmt(it.valor_unitario),163,y,{align:'right'});
+    doc.setFont('helvetica','bold');doc.text(fmt(it.valor_total_calc),190,y,{align:'right'});doc.setFont('helvetica','normal');y+=7;
   });
-  y += 3;
-
-  // === ENTREGAS ===
-  if (entregas && entregas.length > 0) {
-    doc.setLineWidth(0.3); doc.line(20, y, 190, y); y += 8;
-    doc.setFontSize(9); doc.setTextColor(150);
-    doc.text('ENTREGAS PREVISTAS', 20, y); y += 6;
-    doc.setFillColor(245, 240, 232);
-    doc.rect(20, y-4, 170, 7, 'F');
-    doc.setFont('helvetica', 'bold'); doc.setTextColor(0); doc.setFontSize(9);
-    doc.text('Data prevista', 22, y);
-    doc.text('Quantidade', 100, y);
-    doc.text('Status', 160, y);
-    y += 7;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-    entregas.forEach((e, idx) => {
-      if (idx % 2 === 0) { doc.setFillColor(252, 249, 245); doc.rect(20, y-4, 170, 7, 'F'); }
-      doc.setTextColor(0);
-      doc.text(fmtDate(e.data_prevista), 22, y);
-      doc.text(`${e.quantidade} unidades`, 100, y);
-      doc.text(e.status === 'entregue' ? 'Entregue' : e.status === 'atrasado' ? 'Atrasado' : 'Pendente', 160, y);
-      y += 7;
+  y+=3;
+  if (entregas && entregas.length>0) {
+    doc.setLineWidth(0.3);doc.line(20,y,190,y);y+=8;
+    doc.setFontSize(9);doc.setTextColor(150);doc.text('ENTREGAS PREVISTAS',20,y);y+=6;
+    doc.setFillColor(245,240,232);doc.rect(20,y-4,170,7,'F');
+    doc.setFont('helvetica','bold');doc.setTextColor(0);doc.setFontSize(9);
+    doc.text('Data prevista',22,y);doc.text('Quantidade',100,y);doc.text('Status',160,y);y+=7;
+    doc.setFont('helvetica','normal');doc.setFontSize(10);
+    entregas.forEach((e,idx)=>{
+      if(idx%2===0){doc.setFillColor(252,249,245);doc.rect(20,y-4,170,7,'F');}
+      doc.setTextColor(0);doc.text(fmtDate(e.data_prevista),22,y);doc.text(`${e.quantidade} unidades`,100,y);
+      doc.text(e.status==='entregue'?'Entregue':e.status==='atrasado'?'Atrasado':'Pendente',160,y);y+=7;
     });
-    y += 3;
+    y+=3;
   }
-
-  // === TOTAIS ===
-  doc.setLineWidth(0.3); doc.line(20, y, 190, y); y += 8;
-
-  // Linha entrada
-  doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(80);
-  doc.text('Entrada paga:', 120, y);
-  doc.setTextColor(0);
-  doc.text(fmt(entrada), 190, y, { align: 'right' });
-  y += 7;
-
-  // Saldo
-  doc.setTextColor(180, 50, 20);
-  doc.text('Saldo pendente:', 120, y);
-  doc.setFont('helvetica', 'bold');
-  doc.text(fmt(saldo), 190, y, { align: 'right' });
-  y += 8;
-
-  // Total destaque
-  doc.setFillColor(61, 43, 26);
-  doc.rect(20, y-5, 170, 10, 'F');
-  doc.setTextColor(255); doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.text('VALOR TOTAL DO PEDIDO', 25, y+1);
-  doc.setFontSize(12); doc.setFont('helvetica', 'bold');
-  doc.text(fmt(valorTotal), 188, y+1, { align: 'right' });
-  y += 18;
-
-  // === TERMOS ===
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120);
-  doc.text('Termos: Prazo de produção conforme acordado. Entrega condicionada ao pagamento do saldo pendente.', 20, y);
-
+  doc.setLineWidth(0.3);doc.line(20,y,190,y);y+=8;
+  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(80);
+  doc.text('Total recebido:',120,y);doc.setTextColor(0);doc.setFont('helvetica','bold');doc.text(fmt(recebido),190,y,{align:'right'});y+=7;
+  doc.setTextColor(180,50,20);doc.setFont('helvetica','normal');doc.text('Saldo pendente:',120,y);doc.setFont('helvetica','bold');doc.text(fmt(saldo),190,y,{align:'right'});y+=8;
+  doc.setFillColor(61,43,26);doc.rect(20,y-5,170,10,'F');
+  doc.setTextColor(255);doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('VALOR TOTAL DO PEDIDO',25,y+1);
+  doc.setFontSize(12);doc.setFont('helvetica','bold');doc.text(fmt(valorTotal),188,y+1,{align:'right'});y+=18;
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(120);
+  doc.text('Termos: Prazo de produção conforme acordado. Entrega condicionada ao pagamento do saldo pendente.',20,y);
   doc.save(`pedido-${String(pedido.numero).padStart(4,'0')}.pdf`);
   showToast('PDF gerado!', 'success');
 }
@@ -1573,7 +1462,6 @@ function sendWhatsapp() {
 
 // ===== NAV =====
 const pageTitles = { dashboard:['Dashboard','Visão geral do ateliê'], pedidos:['Pedidos','Todos os pedidos sob encomenda'], clientes:['Clientes','Cadastro e histórico'], agenda:['Agenda de Entregas','Calendário de entregas'], financeiro:['Financeiro','Controle de entradas e saldos'], estoque:['Estoque','Matéria-prima e alertas'], 'novo-pedido':['Novo Pedido','Cadastrar pedido sob encomenda'] };
-
 function nav(panel) {
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -1587,19 +1475,13 @@ function nav(panel) {
   document.getElementById('page-sub').textContent = cfg[1];
   if (panel === 'novo-pedido' && itemCount === 0 && !editPedidoId) { addItem(); }
 }
-
-// ===== MODAL =====
 function openModal(id) { document.getElementById(id)?.classList.add('open'); }
 function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
-
-// ===== TOAST =====
 function showToast(msg, type='success') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = `toast ${type} show`;
   setTimeout(() => t.classList.remove('show'), 3500);
 }
-
-// ===== INIT =====
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session) await initApp(session.user);
