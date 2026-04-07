@@ -174,6 +174,9 @@ textarea.form-input{resize:vertical;min-height:60px}
 .toast.success{border-left:4px solid var(--g)}
 .toast.error{border-left:4px solid var(--r)}
 .toast.warning{border-left:4px solid var(--a)}
+.extrato-row{display:grid;grid-template-columns:55px 1fr 70px 70px 75px 72px;gap:4px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--tan);font-size:12px}
+.extrato-row:hover{background:var(--cream)}
+.extrato-head{background:var(--cream);font-size:10px;font-weight:600;color:var(--kraft);text-transform:uppercase;letter-spacing:.5px;border-radius:6px;padding:6px 10px;margin-bottom:4px;display:grid;grid-template-columns:55px 1fr 70px 70px 75px 72px;gap:4px}
 @media(max-width:768px){
   .sidebar{width:56px}
   .sidebar .logo-text,.sidebar .nav-item span,.sidebar .nav-label,.sidebar .badge,.sidebar .user-name{display:none}
@@ -564,6 +567,29 @@ textarea.form-input{resize:vertical;min-height:60px}
   </div>
 </div>
 
+
+<!-- MODAL EXTRATO CLIENTE -->
+<div class="modal-overlay" id="extrato-modal">
+  <div class="modal-box" style="max-width:760px">
+    <div class="modal-header">
+      <div class="modal-title" id="extrato-modal-title">📊 Extrato do Cliente</div>
+      <button class="modal-close" onclick="closeModal('extrato-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="extrato-resumo-cliente" style="background:var(--cream);border-radius:10px;padding:14px 16px;margin-bottom:18px;border:1px solid var(--tan)"></div>
+      <div class="extrato-head">
+        <span>Pedido</span><span>Itens</span><span>Data</span><span>Entrega</span><span>Valor</span><span>Saldo</span>
+      </div>
+      <div id="extrato-lista"></div>
+      <div id="extrato-totais" style="margin-top:12px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('extrato-modal')">Fechar</button>
+      <button class="btn btn-primary" onclick="gerarPDFExtrato()">⬇ Baixar PDF Extrato</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -797,6 +823,7 @@ function renderPedidos(list) {
       <td><span class="status ${statusClass[p.status]||''}">${statusLabels[p.status]||p.status}</span></td>
       <td style="white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="abrirPagamentos('${p.id}')" style="margin-right:4px" title="Pagamentos">💳</button>
+        <button class="btn btn-ghost btn-sm" onclick="gerarOrdemProducao('${p.id}')" style="margin-right:4px" title="Ordem de Produção">🔧</button>
         <button class="btn btn-ghost btn-sm" onclick="editarPedido('${p.id}')" style="margin-right:4px" title="Editar">✏️</button>
         <button class="btn btn-ghost btn-sm" onclick="gerarPDFPedido('${p.id}')" style="margin-right:4px" title="PDF">📄</button>
         <button class="btn btn-ghost btn-sm" onclick="solicitarExclusao('${p.id}','${String(p.numero).padStart(4,'0')}','${(p.clientes?.razao_social||'').replace(/'/g,' ')}')" title="Excluir" style="color:#D63B2F;border-color:#f5bfbf">🗑️</button>
@@ -933,7 +960,10 @@ function renderClientes(list) {
       <td>${c.responsavel||'—'}</td>
       <td>${c.telefone ? `<span style="color:var(--forest)">📱 ${c.telefone}</span>` : '—'}</td>
       <td><span style="background:var(--cream);border:1px solid var(--tan);border-radius:10px;padding:2px 10px;font-size:12px;font-weight:600">${qtdPedidos}</span></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="editarCliente('${c.id}')">✏️</button></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="abrirExtrato('${c.id}')" style="margin-right:4px" title="Extrato">📊</button>
+        <button class="btn btn-ghost btn-sm" onclick="editarCliente('${c.id}')">✏️</button>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -1482,6 +1512,247 @@ function showToast(msg, type='success') {
   t.textContent = msg; t.className = `toast ${type} show`;
   setTimeout(() => t.classList.remove('show'), 3500);
 }
+
+// ===== EXTRATO DO CLIENTE =====
+let extratoClienteId = null;
+
+async function abrirExtrato(clienteId) {
+  extratoClienteId = clienteId;
+  const cliente = allClientes.find(c => c.id === clienteId);
+  document.getElementById('extrato-modal-title').textContent = `📊 Extrato — ${cliente?.razao_social || '—'}`;
+
+  document.getElementById('extrato-resumo-cliente').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-weight:600;font-size:15px">${cliente?.razao_social || '—'}</div>
+        <div style="font-size:11px;color:var(--kraft)">${cliente?.cnpj ? 'CNPJ: '+cliente.cnpj : ''} ${cliente?.responsavel ? '· '+cliente.responsavel : ''} ${cliente?.telefone ? '· '+cliente.telefone : ''}</div>
+      </div>
+      <div style="font-size:11px;color:var(--kraft)">Extrato gerado em ${new Date().toLocaleDateString('pt-BR')}</div>
+    </div>`;
+
+  const pedidosCliente = allPedidos.filter(p => p.cliente_id === clienteId);
+
+  if (!pedidosCliente.length) {
+    document.getElementById('extrato-lista').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido para este cliente</div></div>';
+    document.getElementById('extrato-totais').innerHTML = '';
+    openModal('extrato-modal');
+    return;
+  }
+
+  let totFat = 0, totRec = 0, linhas = '';
+
+  for (const p of pedidosCliente) {
+    const f = p.financeiro_pedido?.[0];
+    const totalItens = (p.itens_pedido||[]).reduce((s,it) => s+(it.valor_total||(it.quantidade*it.valor_unitario)||0),0);
+    const valor = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalItens;
+    const recebido = totalRecebidoPedido(p.id);
+    const saldo = valor - recebido;
+    totFat += valor; totRec += recebido;
+
+    const { data: itens } = await sb.from('itens_pedido').select('modelo,quantidade').eq('pedido_id', p.id);
+    const resumoItens = (itens||[]).map(it=>`${it.quantidade}x ${it.modelo}`).join(', ') || '—';
+    const saldoColor = saldo > 0 ? '#D63B2F' : '#2D5A27';
+
+    linhas += `<div class="extrato-row" style="background:white;border-radius:6px;margin-bottom:3px;border:1px solid var(--tan)">
+      <span style="font-weight:600;color:var(--terra)">#${String(p.numero).padStart(4,'0')}</span>
+      <span style="color:var(--brown);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${resumoItens}">${resumoItens}</span>
+      <span style="color:var(--kraft)">${fmtDate(p.data_pedido)}</span>
+      <span style="color:var(--kraft)">${fmtDate(p.prazo_entrega)}</span>
+      <span style="font-weight:500">${fmt(valor)}</span>
+      <span style="font-weight:700;color:${saldoColor}">${fmt(saldo)}</span>
+    </div>`;
+  }
+
+  document.getElementById('extrato-lista').innerHTML = linhas;
+
+  const saldoTotal = totFat - totRec;
+  document.getElementById('extrato-totais').innerHTML = `
+    <div style="background:var(--cream);border-radius:10px;padding:14px 16px;border:1px solid var(--tan)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px"><span style="color:var(--kraft)">Total faturado</span><span style="font-weight:600">${fmt(totFat)}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:13px"><span style="color:var(--kraft)">Total recebido</span><span style="font-weight:600;color:var(--forest)">${fmt(totRec)}</span></div>
+      <div style="background:var(--dark);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
+        <span style="color:rgba(245,240,232,.65);font-size:12px">Saldo total pendente</span>
+        <span style="color:white;font-family:'DM Serif Display',serif;font-size:22px">${fmt(saldoTotal)}</span>
+      </div>
+    </div>`;
+
+  openModal('extrato-modal');
+}
+
+async function gerarPDFExtrato() {
+  const { jsPDF } = window.jspdf;
+  const cliente = allClientes.find(c => c.id === extratoClienteId);
+  if (!cliente) return;
+  const pedidosCliente = allPedidos.filter(p => p.cliente_id === extratoClienteId);
+  const doc = new jsPDF();
+  let y = 0;
+
+  // Cabeçalho escuro
+  doc.setFillColor(61,43,26); doc.rect(0,0,210,28,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+  doc.text('Atelie Studio',20,12);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(196,168,130);
+  doc.text('Extrato de Pedidos do Cliente',20,20);
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+  doc.text(new Date().toLocaleDateString('pt-BR'),190,12,{align:'right'});
+
+  y = 38;
+  doc.setFillColor(245,240,232); doc.rect(15,y-5,180,22,'F');
+  doc.setTextColor(0); doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text(cliente.razao_social,20,y+3);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(139,111,71);
+  const info = [cliente.cnpj,cliente.responsavel,cliente.telefone].filter(Boolean).join('  ·  ');
+  if(info) doc.text(info,20,y+11);
+
+  y = 68;
+  doc.setFillColor(61,43,26); doc.rect(15,y-5,180,10,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+  doc.text('PEDIDO',18,y+1); doc.text('ITENS',40,y+1); doc.text('DATA',105,y+1);
+  doc.text('ENTREGA',125,y+1); doc.text('VALOR',152,y+1); doc.text('SALDO',175,y+1);
+  y += 8;
+
+  let totFat=0, totRec=0;
+  for(let idx=0;idx<pedidosCliente.length;idx++){
+    const p = pedidosCliente[idx];
+    const f = p.financeiro_pedido?.[0];
+    const totalItens = (p.itens_pedido||[]).reduce((s,it)=>s+(it.valor_total||(it.quantidade*it.valor_unitario)||0),0);
+    const valor = (f?.valor_total&&f.valor_total>0)?f.valor_total:totalItens;
+    const recebido = totalRecebidoPedido(p.id);
+    const saldo = valor-recebido;
+    totFat+=valor; totRec+=recebido;
+
+    const {data:itens} = await sb.from('itens_pedido').select('modelo,quantidade').eq('pedido_id',p.id);
+    const resumo = (itens||[]).map(it=>`${it.quantidade}x ${it.modelo}`).join(', ').substring(0,40)||'—';
+
+    if(idx%2===0){doc.setFillColor(252,249,245);doc.rect(15,y-4,180,9,'F');}
+    doc.setTextColor(196,82,42); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+    doc.text(`#${String(p.numero).padStart(4,'0')}`,18,y+1);
+    doc.setTextColor(0); doc.setFont('helvetica','normal');
+    doc.text(resumo,40,y+1);
+    doc.text(fmtDate(p.data_pedido),105,y+1);
+    doc.text(fmtDate(p.prazo_entrega),125,y+1);
+    doc.text(fmt(valor),152,y+1);
+    doc.setFont('helvetica','bold');
+    if(saldo>0)doc.setTextColor(196,82,42);else doc.setTextColor(45,90,39);
+    doc.text(fmt(saldo),175,y+1);
+    doc.setTextColor(0); y+=9;
+    if(y>265){doc.addPage();y=20;}
+  }
+
+  y+=5;
+  doc.setLineWidth(0.5);doc.setDrawColor(200,180,160);doc.line(15,y,195,y);y+=8;
+  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(139,111,71);
+  doc.text('Total faturado:',120,y);doc.setTextColor(0);doc.setFont('helvetica','bold');doc.text(fmt(totFat),193,y,{align:'right'});y+=8;
+  doc.setFont('helvetica','normal');doc.setTextColor(139,111,71);
+  doc.text('Total recebido:',120,y);doc.setTextColor(45,90,39);doc.setFont('helvetica','bold');doc.text(fmt(totRec),193,y,{align:'right'});y+=8;
+  doc.setFillColor(61,43,26);doc.rect(15,y-4,180,13,'F');
+  doc.setTextColor(196,168,130);doc.setFont('helvetica','normal');doc.setFontSize(9);
+  doc.text('SALDO TOTAL PENDENTE',20,y+4);
+  doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(13);
+  doc.text(fmt(totFat-totRec),193,y+4,{align:'right'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(150);
+  doc.text('Atelie Studio · Sistema de Gestao',105,285,{align:'center'});
+
+  doc.save(`extrato-${cliente.razao_social.replace(/[^a-z0-9]/gi,'_').toLowerCase()}.pdf`);
+  showToast('Extrato gerado!','success');
+}
+
+// ===== ORDEM DE PRODUÇÃO =====
+async function gerarOrdemProducao(pedidoId) {
+  const { jsPDF } = window.jspdf;
+  const pedido = allPedidos.find(p => p.id === pedidoId);
+  if (!pedido) { showToast('Pedido não encontrado','error'); return; }
+  const cliente = allClientes.find(c => c.id === pedido.cliente_id);
+  const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', pedidoId);
+  const { data: entregas } = await sb.from('entregas').select('*').eq('pedido_id', pedidoId).order('data_prevista');
+
+  // Formato A5 landscape = meia folha A4 cortada ao meio
+  const doc = new jsPDF({ format: 'a5', orientation: 'landscape' });
+  const W = 210, H = 148;
+  let y = 0;
+
+  // Faixa topo
+  doc.setFillColor(61,43,26); doc.rect(0,0,W,16,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text('ORDEM DE PRODUCAO',10,11);
+  doc.setFontSize(15); doc.setTextColor(196,168,130);
+  doc.text(`#${String(pedido.numero).padStart(4,'0')}`,W-10,11,{align:'right'});
+
+  y = 24;
+  // Cliente e datas
+  doc.setFillColor(245,240,232); doc.rect(8,y-3,W-16,14,'F');
+  doc.setTextColor(139,111,71); doc.setFont('helvetica','normal'); doc.setFontSize(7);
+  doc.text('CLIENTE',10,y+1); doc.text('PEDIDO EM',100,y+1); doc.text('ENTREGA PREVISTA',145,y+1);
+  doc.setTextColor(0); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+  doc.text(cliente?.razao_social||'—',10,y+8);
+  doc.setFontSize(9);
+  doc.text(fmtDate(pedido.data_pedido),100,y+8);
+  doc.setTextColor(196,82,42); doc.setFontSize(10);
+  doc.text(fmtDate(pedido.prazo_entrega),145,y+8);
+  doc.setTextColor(0);
+
+  y = 44;
+  doc.setLineWidth(0.3); doc.setDrawColor(200,180,160); doc.line(8,y,W-8,y); y+=4;
+
+  // Header tabela itens
+  doc.setFillColor(61,43,26); doc.rect(8,y-3,W-16,8,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+  doc.text('MODELO',12,y+2); doc.text('COR',95,y+2); doc.text('LOGOTIPO',130,y+2);
+  doc.text('QTD',W-12,y+2,{align:'right'});
+  y += 8;
+
+  doc.setTextColor(0);
+  (itens||[]).forEach((it,idx) => {
+    if(idx%2===1){doc.setFillColor(252,249,245);doc.rect(8,y-3,W-16,8,'F');}
+    doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text(String(it.modelo||'').substring(0,32),12,y+2);
+    doc.setFont('helvetica','normal');
+    doc.text(String(it.cor||'—').substring(0,16),95,y+2);
+    doc.text(String(it.logotipo||'—').substring(0,20),130,y+2);
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(61,43,26);
+    doc.text(String(it.quantidade),W-12,y+2,{align:'right'});
+    doc.setTextColor(0); doc.setFontSize(9); y+=8;
+  });
+
+  y += 2;
+  doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=4;
+
+  // Entregas
+  if(entregas && entregas.length>0){
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(139,111,71);
+    doc.text('ENTREGAS:',10,y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(0); doc.setFontSize(8);
+    const etxt = entregas.map(e=>`${fmtDate(e.data_prevista)} — ${e.quantidade} un`).join('   ');
+    doc.text(etxt,38,y); y+=7;
+    doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=4;
+  }
+
+  // Observações
+  if(pedido.observacoes){
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(139,111,71);
+    doc.text('OBS:',10,y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(0); doc.setFontSize(8);
+    doc.text(pedido.observacoes.substring(0,120),24,y); y+=7;
+    doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=4;
+  }
+
+  // Área de anotações manuais
+  const anoY = Math.max(y+2, H-38);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(160);
+  doc.text('Anotações / Conferência:',10,anoY);
+  for(let i=0;i<4;i++){
+    doc.setLineWidth(0.2); doc.setDrawColor(200,200,200);
+    doc.line(10,anoY+5+(i*8),W-10,anoY+5+(i*8));
+  }
+
+  // Rodapé
+  doc.setFontSize(7); doc.setTextColor(180);
+  doc.text('Atelie Studio · Ordem de Producao Interna · Uso exclusivo da producao',W/2,H-3,{align:'center'});
+
+  doc.save(`ordem-producao-${String(pedido.numero).padStart(4,'0')}.pdf`);
+  showToast('Ordem de producao gerada!','success');
+}
+
 (async () => {
   const { data: { session } } = await sb.auth.getSession();
   if (session) await initApp(session.user);
