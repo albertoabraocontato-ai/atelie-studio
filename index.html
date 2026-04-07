@@ -645,13 +645,19 @@ async function initApp(user) {
   document.getElementById('register-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'flex';
   const { data: usr } = await sb.from('usuarios').select('*, empresas(*)').eq('email', user.email).single();
-  if (usr) {
+  if (usr && usr.empresa_id) {
     empresaId = usr.empresa_id;
     document.getElementById('user-name').textContent = usr.nome;
     document.getElementById('user-avatar').textContent = usr.nome[0].toUpperCase();
   } else {
-    const { data: emp } = await sb.from('empresas').select('id').limit(1).single();
-    if (emp) empresaId = emp.id;
+    // Seguranca: bloqueia acesso se nao houver empresa vinculada
+    await sb.auth.signOut();
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'flex';
+    const err = document.getElementById('auth-err');
+    err.textContent = 'Acesso nao configurado. Entre em contato com o administrador.';
+    err.style.display = 'block';
+    return;
   }
   document.getElementById('p-data').value = new Date().toISOString().split('T')[0];
   document.getElementById('mov-data').value = new Date().toISOString().split('T')[0];
