@@ -1710,9 +1710,30 @@ async function gerarOrdemProducao(pedidoId) {
   const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', pedidoId);
   const { data: entregas } = await sb.from('entregas').select('*').eq('pedido_id', pedidoId).order('data_prevista');
 
-  // Formato A5 landscape = meia folha A4 cortada ao meio
-  const doc = new jsPDF({ format: 'a5', orientation: 'landscape' });
-  const W = 210, H = 148;
+  // Calcular linhas de observação antes de decidir o formato
+  const FONT_SIZE_OBS = 8;
+  let obsLines = [];
+  if (pedido.observacoes) {
+    // Simular com A5 landscape (W=210) para calcular quebras
+    const docTemp = new jsPDF({ format: 'a5', orientation: 'landscape' });
+    docTemp.setFontSize(FONT_SIZE_OBS);
+    obsLines = docTemp.splitTextToSize(pedido.observacoes, 188); // 210 - 22px margem
+  }
+
+  // Estimar altura necessária para o conteúdo
+  const alturaItens = (itens||[]).length * 9;
+  const alturaEntregas = (entregas&&entregas.length>0) ? 12 : 0;
+  const alturaObs = obsLines.length > 0 ? (8 + obsLines.length * 6) : 0;
+  const alturaTotal = 55 + alturaItens + alturaEntregas + alturaObs + 20;
+
+  // Decidir formato: A5 landscape (148mm altura) ou A4 portrait (297mm)
+  const usarA4 = alturaTotal > 130;
+  const doc = usarA4
+    ? new jsPDF({ format: 'a4', orientation: 'portrait' })
+    : new jsPDF({ format: 'a5', orientation: 'landscape' });
+
+  const W = usarA4 ? 210 : 210;
+  const H = usarA4 ? 297 : 148;
   let y = 0;
 
   // Faixa topo
@@ -1726,40 +1747,48 @@ async function gerarOrdemProducao(pedidoId) {
   // Cliente e datas
   doc.setFillColor(245,240,232); doc.rect(8,y-3,W-16,14,'F');
   doc.setTextColor(139,111,71); doc.setFont('helvetica','normal'); doc.setFontSize(7);
-  doc.text('CLIENTE',10,y+1); doc.text('PEDIDO EM',100,y+1); doc.text('ENTREGA PREVISTA',145,y+1);
+  doc.text('CLIENTE',10,y+1); doc.text('PEDIDO EM',100,y+1); doc.text('ENTREGA PREVISTA',150,y+1);
   doc.setTextColor(0); doc.setFont('helvetica','bold'); doc.setFontSize(10);
-  doc.text(cliente?.razao_social||'—',10,y+8);
+  doc.text(String(cliente?.razao_social||'—').substring(0,35),10,y+8);
   doc.setFontSize(9);
   doc.text(fmtDate(pedido.data_pedido),100,y+8);
   doc.setTextColor(196,82,42); doc.setFontSize(10);
-  doc.text(fmtDate(pedido.prazo_entrega),145,y+8);
+  doc.text(fmtDate(pedido.prazo_entrega),150,y+8);
   doc.setTextColor(0);
 
   y = 44;
   doc.setLineWidth(0.3); doc.setDrawColor(200,180,160); doc.line(8,y,W-8,y); y+=4;
 
-  // Header tabela itens
+  // Header tabela itens — colunas ajustadas para não cortar logotipo
   doc.setFillColor(61,43,26); doc.rect(8,y-3,W-16,8,'F');
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8);
-  doc.text('MODELO',12,y+2); doc.text('COR',95,y+2); doc.text('LOGOTIPO',130,y+2);
+  doc.text('MODELO',12,y+2);
+  doc.text('COR',88,y+2);
+  doc.text('LOGOTIPO',118,y+2);
   doc.text('QTD',W-12,y+2,{align:'right'});
   y += 8;
 
   doc.setTextColor(0);
   (itens||[]).forEach((it,idx) => {
-    if(idx%2===1){doc.setFillColor(252,249,245);doc.rect(8,y-3,W-16,8,'F');}
-    doc.setFont('helvetica','bold'); doc.setFontSize(9);
-    doc.text(String(it.modelo||'').substring(0,32),12,y+2);
+    if(idx%2===1){doc.setFillColor(252,249,245);doc.rect(8,y-3,W-16,9,'F');}
+    doc.setFont('helvetica','bold'); doc.setFontSize(8);
+    // Modelo: até coluna 88
+    const modeloTxt = doc.splitTextToSize(String(it.modelo||''), 74)[0];
+    doc.text(modeloTxt,12,y+2);
     doc.setFont('helvetica','normal');
-    doc.text(String(it.cor||'—').substring(0,16),95,y+2);
-    doc.text(String(it.logotipo||'—').substring(0,20),130,y+2);
+    // Cor: até coluna 118
+    const corTxt = doc.splitTextToSize(String(it.cor||'—'), 28)[0];
+    doc.text(corTxt,88,y+2);
+    // Logotipo: até coluna W-20 (muito mais espaço agora)
+    const logoTxt = doc.splitTextToSize(String(it.logotipo||'—'), 58)[0];
+    doc.text(logoTxt,118,y+2);
     doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(61,43,26);
     doc.text(String(it.quantidade),W-12,y+2,{align:'right'});
-    doc.setTextColor(0); doc.setFontSize(9); y+=8;
+    doc.setTextColor(0); doc.setFontSize(8); y+=9;
   });
 
   y += 2;
-  doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=4;
+  doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=5;
 
   // Entregas
   if(entregas && entregas.length>0){
@@ -1767,61 +1796,38 @@ async function gerarOrdemProducao(pedidoId) {
     doc.text('ENTREGAS:',10,y);
     doc.setFont('helvetica','normal'); doc.setTextColor(0); doc.setFontSize(8);
     const etxt = entregas.map(e=>`${fmtDate(e.data_prevista)} — ${e.quantidade} un`).join('   ');
-    doc.text(etxt,38,y); y+=7;
-    doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=4;
+    doc.text(etxt,40,y); y+=8;
+    doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=5;
   }
 
-  // Observações — com quebra de linha automática e formato adaptativo
-  let obsLines = [];
-  if(pedido.observacoes){
+  // Observações — usando splitTextToSize do jsPDF (método correto)
+  if(obsLines.length > 0){
     doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(139,111,71);
     doc.text('OBS:',10,y); y+=6;
-    doc.setFont('helvetica','normal'); doc.setTextColor(0); doc.setFontSize(8);
-    // Quebrar observações em linhas que cabem na página
-    const obsMaxW = W - 20;
-    const obsWords = pedido.observacoes.split(' ');
-    let obsLine = '';
-    for(const word of obsWords){
-      const test = obsLine ? obsLine + ' ' + word : word;
-      if(doc.getStringUnitWidth(test) * 8 / doc.internal.scaleFactor < obsMaxW){
-        obsLine = test;
-      } else {
-        if(obsLine){ obsLines.push(obsLine); obsLine = word; }
-        else { obsLines.push(word); obsLine = ''; }
-      }
-    }
-    if(obsLine) obsLines.push(obsLine);
+    doc.setFont('helvetica','normal'); doc.setTextColor(0); doc.setFontSize(FONT_SIZE_OBS);
     for(const ln of obsLines){
       doc.text(ln, 10, y); y+=6;
     }
-    doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=4;
+    y+=3;
+    doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=5;
   }
 
-  // Verificar se precisa de folha A4 completa
-  const precisaA4 = y > H - 30;
-
-  // Área de anotações manuais (só se couber)
-  if(!precisaA4){
-    const anoY = Math.max(y+2, H-38);
+  // Área de anotações manuais
+  const espacoRestante = H - y - 15;
+  if(espacoRestante > 25){
     doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(160);
-    doc.text('Anotações / Conferência:',10,anoY);
-    for(let i=0;i<4;i++){
+    doc.text('Anotações / Conferência:',10,y); y+=6;
+    const numLinhas = Math.min(4, Math.floor(espacoRestante/8));
+    for(let i=0;i<numLinhas;i++){
       doc.setLineWidth(0.2); doc.setDrawColor(200,200,200);
-      doc.line(10,anoY+5+(i*8),W-10,anoY+5+(i*8));
-    }
-  } else {
-    // Adicionar segunda página A4 com continuação das observações se necessário
-    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(160);
-    if(y < H - 12){
-      doc.text('Anotações:', 10, y); y+=5;
-      doc.setLineWidth(0.2); doc.setDrawColor(200,200,200);
-      doc.line(10,y,W-10,y);
+      doc.line(10,y,W-10,y); y+=8;
     }
   }
 
   // Rodapé
   doc.setFontSize(7); doc.setTextColor(180);
-  doc.text('Atelie Studio · Ordem de Producao Interna · Uso exclusivo da producao',W/2,H-3,{align:'center'});
+  const tipoFolha = usarA4 ? 'A4' : 'Meia folha A4';
+  doc.text(`Atelie Studio · Ordem de Producao Interna · ${tipoFolha}`,W/2,H-4,{align:'center'});
 
   doc.save(`ordem-producao-${String(pedido.numero).padStart(4,'0')}.pdf`);
   showToast('Ordem de producao gerada!','success');
