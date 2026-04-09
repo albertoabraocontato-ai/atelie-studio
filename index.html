@@ -1089,39 +1089,39 @@ function addItem() {
   document.getElementById('itens-tbody').appendChild(tr);
 }
 function removeItem(id) { document.getElementById('item-row-'+id)?.remove(); calcTotal(); }
+// totalBaseItens guarda o total puro dos itens (sem taxa)
+let totalBaseItens = 0;
+
 function calcTotal() {
-  let total = 0;
+  totalBaseItens = 0;
   for (let i = 1; i <= itemCount; i++) {
     const q = parseFloat(document.getElementById('it-qtd-'+i)?.value)||0;
     const p = parseFloat(document.getElementById('it-preco-'+i)?.value)||0;
     const t = q*p;
     const el = document.getElementById('it-total-'+i);
     if (el) el.textContent = fmt(t);
-    total += t;
+    totalBaseItens += t;
   }
-  document.getElementById('total-display').textContent = fmt(total);
   calcSaldo();
 }
 function calcSaldo() {
-  const totalText = document.getElementById('total-display').textContent;
-  const totalItens = parseFloat(totalText.replace('R$ ','').replace(/\./g,'').replace(',','.'))||0;
   const taxa = parseFloat(document.getElementById('p-taxa-cartao')?.value)||0;
-  const valorTaxa = taxa > 0 ? totalItens * (taxa/100) : 0;
-  const totalComTaxa = totalItens + valorTaxa;
-  // Atualizar display do total com taxa se aplicável
+  const valorTaxa = taxa > 0 ? totalBaseItens * (taxa/100) : 0;
+  const totalComTaxa = totalBaseItens + valorTaxa;
+  // Atualizar info da taxa
   const taxaEl = document.getElementById('taxa-cartao-valor');
   if (taxaEl) taxaEl.textContent = taxa > 0 ? `+ ${fmt(valorTaxa)} de taxa = ${fmt(totalComTaxa)}` : '';
-  const entrada = parseFloat(document.getElementById('p-entrada').value)||0;
-  document.getElementById('p-saldo').value = fmt(totalComTaxa - entrada);
-  // Atualizar total display quando há taxa
+  // Atualizar display do total
   const totalDisplayEl = document.getElementById('total-display');
   if (taxa > 0) {
     totalDisplayEl.textContent = fmt(totalComTaxa);
-    totalDisplayEl.title = `Itens: ${fmt(totalItens)} + Taxa cartão: ${fmt(valorTaxa)}`;
+    totalDisplayEl.title = `Itens: ${fmt(totalBaseItens)} + Taxa cartão: ${fmt(valorTaxa)}`;
   } else {
-    totalDisplayEl.textContent = fmt(totalItens);
+    totalDisplayEl.textContent = fmt(totalBaseItens);
     totalDisplayEl.title = '';
   }
+  const entrada = parseFloat(document.getElementById('p-entrada').value)||0;
+  document.getElementById('p-saldo').value = fmt(totalComTaxa - entrada);
 }
 
 function toggleTaxaCartao() {
@@ -1165,7 +1165,7 @@ async function salvarPedido() {
   const totalVal = itens.reduce((s,it)=>s+it.valor_total, 0);
   const taxaCartao = parseFloat(document.getElementById('p-taxa-cartao')?.value)||0;
   const valorTaxaCartao = taxaCartao > 0 ? totalVal * (taxaCartao/100) : 0;
-  const totalValComTaxa = totalVal + valorTaxaCartao;
+  const totalValComTaxa = Math.round((totalVal + valorTaxaCartao) * 100) / 100;
   const pedidoData = { empresa_id: empresaId, cliente_id: clienteId, data_pedido: document.getElementById('p-data').value, prazo_entrega: document.getElementById('p-prazo').value || null, status: document.getElementById('p-status').value, observacoes: document.getElementById('p-obs').value };
   const btnSalvar = document.getElementById('btn-salvar-pedido');
   btnSalvar.textContent = 'Salvando...'; btnSalvar.disabled = true;
