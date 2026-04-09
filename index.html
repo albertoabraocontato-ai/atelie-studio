@@ -1212,6 +1212,8 @@ async function salvarPedido() {
     }
     showToast(editPedidoId ? 'Pedido atualizado!' : 'Pedido criado com sucesso!', 'success');
     resetPedidoForm();
+    // Forçar recarregamento completo dos dados do servidor
+    allPedidos = []; allFin = [];
     await loadAll();
     nav('pedidos');
   } catch(e) {
@@ -1426,7 +1428,9 @@ async function loadPdfPreview() {
   const pedido = allPedidos.find(p=>p.id===id);
   const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', id);
   const { data: entregas } = await sb.from('entregas').select('*').eq('pedido_id', id);
-  const f = pedido?.financeiro_pedido?.[0];
+  // Buscar financeiro direto do banco para garantir valor atualizado com taxa
+  const { data: finFresh } = await sb.from('financeiro_pedido').select('*').eq('pedido_id', id).single();
+  const f = finFresh || pedido?.financeiro_pedido?.[0];
   const cliente = allClientes.find(c=>c.id===pedido?.cliente_id);
   const itensComTotal = (itens||[]).map(it => ({ ...it, valor_total_calc: it.valor_total || (it.quantidade * it.valor_unitario) }));
   const totalItensCalc = itensComTotal.reduce((s, it) => s + it.valor_total_calc, 0);
@@ -1474,7 +1478,9 @@ async function gerarPDF() {
   const id = document.getElementById('pdf-pedido-select').value;
   const pedido = allPedidos.find(p=>p.id===id);
   if (!pedido) { showToast('Selecione um pedido', 'error'); return; }
-  const f = pedido?.financeiro_pedido?.[0];
+  // Buscar financeiro direto do banco para garantir valor atualizado com taxa
+  const { data: finFresh } = await sb.from('financeiro_pedido').select('*').eq('pedido_id', id).single();
+  const f = finFresh || pedido?.financeiro_pedido?.[0];
   const cliente = allClientes.find(c=>c.id===pedido?.cliente_id);
   const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', id);
   const { data: entregas } = await sb.from('entregas').select('*').eq('pedido_id', id).order('data_prevista');
