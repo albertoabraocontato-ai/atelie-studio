@@ -1458,8 +1458,9 @@ async function gerarPDF() {
   const { data: itens } = await sb.from('itens_pedido').select('*').eq('pedido_id', id);
   const { data: entregas } = await sb.from('entregas').select('*').eq('pedido_id', id).order('data_prevista');
   const itensComTotal = (itens||[]).map(it => ({ ...it, valor_total_calc: it.valor_total || (it.quantidade * it.valor_unitario) }));
-  const totalCalculado = itensComTotal.reduce((s, it) => s + it.valor_total_calc, 0);
-  const valorTotal = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalCalculado;
+  const totalItens = itensComTotal.reduce((s, it) => s + it.valor_total_calc, 0);
+  // Usar sempre o valor_total do financeiro pois já inclui taxa de cartão se aplicável
+  const valorTotal = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalItens;
   const recebido = totalRecebidoPedido(id);
   const saldo = valorTotal - recebido;
   const doc = new jsPDF();
