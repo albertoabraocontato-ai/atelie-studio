@@ -684,7 +684,7 @@ async function loadAll() {
 }
 
 async function loadPedidos() {
-  const { data } = await sb.from('pedidos').select('*, clientes(razao_social), financeiro_pedido(*), itens_pedido(quantidade, valor_unitario, valor_total)').eq('empresa_id', empresaId).order('criado_em', { ascending: false });
+  const { data } = await sb.from('pedidos').select('*, clientes(razao_social), financeiro_pedido(*), itens_pedido(quantidade, valor_unitario, valor_total)').eq('empresa_id', empresaId).order('numero', { ascending: false });
   allPedidos = data || [];
   renderPedidos();
   populatePdfSelect();
@@ -814,9 +814,10 @@ function renderPedidos(list) {
   const tb = document.getElementById('pedidos-tbody');
   if (!dados.length) { tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido encontrado</div></div></td></tr>'; return; }
   tb.innerHTML = dados.map(p => {
-    const f = p.financeiro_pedido?.[0];
+    // Buscar financeiro do allFin que é carregado separadamente e tem dados mais frescos
+    const fFin = allFin.find(f => f.pedido_id === p.id);
+    const f = fFin || p.financeiro_pedido?.[0];
     const totalItens = (p.itens_pedido||[]).reduce((s,it) => s + (it.valor_total || (it.quantidade * it.valor_unitario) || 0), 0);
-    // Usar f.valor_total que já inclui taxa de cartão quando aplicável
     const total = (f?.valor_total && f.valor_total > 0) ? f.valor_total : totalItens;
     const recebido = totalRecebidoPedido(p.id);
     const saldo = total - recebido;
