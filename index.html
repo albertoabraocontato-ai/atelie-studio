@@ -1211,11 +1211,8 @@ async function salvarPedido() {
       if (qtdE && dataE) await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE });
     }
     showToast(editPedidoId ? 'Pedido atualizado!' : 'Pedido criado com sucesso!', 'success');
-    resetPedidoForm();
-    // Forçar recarregamento completo dos dados do servidor
-    allPedidos = []; allFin = [];
-    await loadAll();
-    nav('pedidos');
+    // Reload completo para garantir dados frescos do banco
+    setTimeout(() => { window.location.reload(); }, 1000);
   } catch(e) {
     console.error('Erro ao salvar pedido:', e);
     showToast('Erro: ' + e.message, 'error');
