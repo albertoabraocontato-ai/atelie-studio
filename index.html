@@ -397,10 +397,11 @@ textarea.form-input{resize:vertical;min-height:60px}
               <div class="form-group fg-full" id="taxa-cartao-row" style="display:none">
                 <label class="form-label" style="color:var(--terra)">💳 Taxa do cartão (%)</label>
                 <div style="display:flex;align-items:center;gap:10px">
-                  <input type="number" step="0.1" min="0" max="100" class="form-input" id="p-taxa-cartao" placeholder="Ex: 3.5" oninput="calcSaldo()" style="max-width:140px">
+                  <input type="number" step="0.1" min="0" max="100" class="form-input" id="p-taxa-cartao" placeholder="Ex: 3.5" oninput="salvarTaxaTemp();calcSaldo()" style="max-width:140px">
                   <span id="taxa-cartao-valor" style="font-size:13px;color:var(--terra);font-weight:600"></span>
                 </div>
               </div>
+              <input type="hidden" id="p-taxa-cartao-hidden" value="0">
               <div class="form-group fg-full"><label class="form-label">Saldo pendente</label><input type="text" class="form-input" id="p-saldo" readonly style="background:#f9f6f2;color:var(--r);font-weight:500"></div>
             </div>
             <div class="section-label">Entregas</div>
@@ -1119,6 +1120,10 @@ function calcSaldo() {
   document.getElementById('p-saldo').value = fmt(totalComTaxa - entrada);
 }
 
+function salvarTaxaTemp() {
+  const v = parseFloat(document.getElementById('p-taxa-cartao')?.value)||0;
+  document.getElementById('p-taxa-cartao-hidden').value = v;
+}
 function toggleTaxaCartao() {
   const forma = document.getElementById('p-forma').value;
   const row = document.getElementById('taxa-cartao-row');
@@ -1128,8 +1133,9 @@ function toggleTaxaCartao() {
   } else {
     row.style.display = 'none';
     if (taxaInput) taxaInput.value = '';
+    document.getElementById('p-taxa-cartao-hidden').value = 0;
   }
-  calcTotal(); // recalcular tudo
+  calcTotal();
 }
 function addEntregaForm() {
   entregaFormCount++;
@@ -1166,7 +1172,10 @@ async function salvarPedido() {
       totalVal += (parseFloat(qtdEl.value)||0) * (parseFloat(precoEl.value)||0);
     }
   }
-  const taxaCartao = parseFloat(document.getElementById('p-taxa-cartao')?.value)||0;
+  // Ler taxa do campo visível OU do campo hidden (backup)
+  const taxaCartaoVisible = parseFloat(document.getElementById('p-taxa-cartao')?.value)||0;
+  const taxaCartaoHidden = parseFloat(document.getElementById('p-taxa-cartao-hidden')?.value)||0;
+  const taxaCartao = taxaCartaoVisible > 0 ? taxaCartaoVisible : taxaCartaoHidden;
   const valorTaxaCartao = taxaCartao > 0 ? totalVal * (taxaCartao/100) : 0;
   const totalValComTaxa = Math.round((totalVal + valorTaxaCartao) * 100) / 100;
   const pedidoData = { empresa_id: empresaId, cliente_id: clienteId, data_pedido: document.getElementById('p-data').value, prazo_entrega: document.getElementById('p-prazo').value || null, status: document.getElementById('p-status').value, observacoes: document.getElementById('p-obs').value };
@@ -1226,6 +1235,7 @@ function resetPedidoForm() {
   document.getElementById('p-data-entrada').value = '';
   document.getElementById('p-forma').value = '';
   document.getElementById('p-taxa-cartao').value = '';
+  document.getElementById('p-taxa-cartao-hidden').value = 0;
   document.getElementById('taxa-cartao-row').style.display = 'none';
   document.getElementById('p-custo').value = '';
   document.getElementById('p-saldo').value = '';
@@ -1252,7 +1262,9 @@ async function editarPedido(id) {
     document.getElementById('p-forma').value = f.forma_pagamento||'';
     if (f.forma_pagamento === 'Cartão') {
       document.getElementById('taxa-cartao-row').style.display = 'block';
-      document.getElementById('p-taxa-cartao').value = f.taxa_cartao||'';
+      const taxaVal = f.taxa_cartao||0;
+    document.getElementById('p-taxa-cartao').value = taxaVal;
+    document.getElementById('p-taxa-cartao-hidden').value = taxaVal;
     } else {
       document.getElementById('taxa-cartao-row').style.display = 'none';
       document.getElementById('p-taxa-cartao').value = '';
