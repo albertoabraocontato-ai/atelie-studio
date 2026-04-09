@@ -1157,7 +1157,15 @@ async function salvarPedido() {
     itens.push({ empresa_id: empresaId, modelo, cor: document.getElementById('it-cor-'+i)?.value||'', logotipo: document.getElementById('it-logo-'+i)?.value||'', quantidade: qtd, valor_unitario: preco, valor_total: qtd * preco });
   }
   if (!itens.length) { showToast('Adicione pelo menos um item', 'error'); return; }
-  const totalVal = itens.reduce((s,it)=>s+it.valor_total, 0);
+  // Recalcular total direto dos campos — nunca depender de variável global
+  let totalVal = 0;
+  for (let i = 1; i <= itemCount; i++) {
+    const qtdEl = document.getElementById('it-qtd-'+i);
+    const precoEl = document.getElementById('it-preco-'+i);
+    if (qtdEl && precoEl) {
+      totalVal += (parseFloat(qtdEl.value)||0) * (parseFloat(precoEl.value)||0);
+    }
+  }
   const taxaCartao = parseFloat(document.getElementById('p-taxa-cartao')?.value)||0;
   const valorTaxaCartao = taxaCartao > 0 ? totalVal * (taxaCartao/100) : 0;
   const totalValComTaxa = Math.round((totalVal + valorTaxaCartao) * 100) / 100;
