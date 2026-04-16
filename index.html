@@ -591,6 +591,18 @@ textarea.form-input{resize:vertical;min-height:60px}
   </div>
 </div>
 
+<div class="modal-overlay" id="confirm-cliente-modal">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">Excluir cliente?</div>
+    <div class="confirm-desc" id="confirm-cliente-desc">Esta ação é permanente e removerá todos os pedidos e dados vinculados.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeModal('confirm-cliente-modal')">Cancelar</button>
+      <button class="btn btn-danger" onclick="confirmarExclusaoCliente()" style="background:var(--r);color:white;border:none">Sim, excluir</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -972,7 +984,8 @@ function renderClientes(list) {
       <td><span style="background:var(--cream);border:1px solid var(--tan);border-radius:10px;padding:2px 10px;font-size:12px;font-weight:600">${qtdPedidos}</span></td>
       <td style="white-space:nowrap">
         <button class="btn btn-ghost btn-sm" onclick="abrirExtrato('${c.id}')" style="margin-right:4px" title="Extrato">📊</button>
-        <button class="btn btn-ghost btn-sm" onclick="editarCliente('${c.id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="editarCliente('${c.id}')" style="margin-right:4px">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="solicitarExclusaoCliente('${c.id}','${c.razao_social.replace(/'/g,' ')}')" style="color:#D63B2F;border-color:#f5bfbf" title="Excluir">🗑️</button>
       </td>
     </tr>`;
   }).join('');
@@ -1857,6 +1870,43 @@ async function gerarOrdemProducao(pedidoId) {
 
   doc.save(`ordem-producao-${String(pedido.numero).padStart(4,'0')}.pdf`);
   showToast('Ordem de producao gerada!','success');
+}
+
+// ===== EXCLUSÃO DE CLIENTE =====
+let clienteParaExcluir = null;
+
+function solicitarExclusaoCliente(id, nome) {
+  clienteParaExcluir = id;
+  document.getElementById('confirm-cliente-desc').textContent = `Você está prestes a excluir o cliente "${nome}" e TODOS os pedidos, entregas, pagamentos e dados financeiros vinculados a ele. Esta ação é permanente.`;
+  openModal('confirm-cliente-modal');
+}
+
+async function confirmarExclusaoCliente() {
+  if (!clienteParaExcluir) return;
+  const btn = document.querySelector('#confirm-cliente-modal .btn-danger');
+  btn.textContent = 'Excluindo...'; btn.disabled = true;
+  try {
+    // Buscar todos os pedidos do cliente
+    const { data: pedidos } = await sb.from('pedidos').select('id').eq('cliente_id', clienteParaExcluir);
+    // Excluir tudo vinculado a cada pedido
+    for (const p of (pedidos || [])) {
+      await sb.from('pagamentos').delete().eq('pedido_id', p.id);
+      await sb.from('itens_pedido').delete().eq('pedido_id', p.id);
+      await sb.from('entregas').delete().eq('pedido_id', p.id);
+      await sb.from('financeiro_pedido').delete().eq('pedido_id', p.id);
+      await sb.from('pedidos').delete().eq('id', p.id);
+    }
+    // Excluir o cliente
+    await sb.from('clientes').delete().eq('id', clienteParaExcluir);
+    showToast('Cliente excluído com sucesso!', 'success');
+    closeModal('confirm-cliente-modal');
+    clienteParaExcluir = null;
+    await loadAll();
+  } catch(e) {
+    showToast('Erro ao excluir: ' + e.message, 'error');
+  } finally {
+    btn.textContent = 'Sim, excluir'; btn.disabled = false;
+  }
 }
 
 (async () => {
