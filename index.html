@@ -225,6 +225,8 @@ textarea.form-input{resize:vertical;min-height:60px}
       <div class="nav-label">Operacional</div>
       <button class="nav-item" onclick="nav('financeiro')"><div class="nav-icon">💰</div><span>Financeiro</span></button>
       <button class="nav-item" onclick="nav('estoque')"><div class="nav-icon">📦</div><span>Estoque</span><span class="badge" id="badge-estoque" style="display:none">!</span></button>
+      <button class="nav-item" onclick="nav('gastos')"><div class="nav-icon">🛒</div><span>Gastos</span></button>
+      <button class="nav-item" onclick="nav('producao-externa')"><div class="nav-icon">🏭</div><span>Prod. Externa</span></button>
     </div>
     <div class="sidebar-footer">
       <div class="user-info">
@@ -349,6 +351,38 @@ textarea.form-input{resize:vertical;min-height:60px}
             <table class="data-table">
               <thead><tr><th>Material</th><th>Qtd atual</th><th>Unidade</th><th>Estoque mín.</th><th>Custo/unit</th><th>Valor total</th><th>Status</th><th>Ações</th></tr></thead>
               <tbody id="estoque-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- GASTOS -->
+      <div class="panel" id="panel-gastos">
+        <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="openModal('gasto-modal');editGasto=null;document.getElementById('form-gasto').reset();document.getElementById('g-data').value=new Date().toISOString().split('T')[0]">+ Lançar gasto</button>
+          <span style="font-size:12px;color:var(--kraft);margin-left:8px">Total do período: <strong id="gastos-total" style="color:var(--terra)">R$ 0,00</strong></span>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Data</th><th>Material</th><th>Qtd</th><th>Valor unit.</th><th>Total</th><th>Obs</th><th>Ações</th></tr></thead>
+              <tbody id="gastos-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUÇÃO EXTERNA -->
+      <div class="panel" id="panel-producao-externa">
+        <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="openModal('prod-ext-modal');editProdExt=null;document.getElementById('form-prod-ext').reset();document.getElementById('pe-data').value=new Date().toISOString().split('T')[0]">+ Lançar entrega</button>
+          <button class="btn btn-ghost btn-sm" onclick="gerarExtratoProdExt()">📊 Extrato completo</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Data</th><th>Produtora</th><th>Tipo de caixa</th><th>Cor</th><th>Logotipo</th><th>Qtd</th><th>Valor unit.</th><th>Total</th><th>Obs</th><th>Ações</th></tr></thead>
+              <tbody id="prod-ext-tbody"></tbody>
             </table>
           </div>
         </div>
@@ -591,6 +625,77 @@ textarea.form-input{resize:vertical;min-height:60px}
   </div>
 </div>
 
+<!-- MODAL GASTO -->
+<div class="modal-overlay" id="gasto-modal">
+  <div class="modal-box">
+    <div class="modal-header"><div class="modal-title" id="gasto-modal-title">Lançar Gasto</div><button class="modal-close" onclick="closeModal('gasto-modal')">✕</button></div>
+    <div class="modal-body">
+      <form id="form-gasto" onsubmit="return false">
+        <div class="form-grid">
+          <div class="form-group fg-full">
+            <label class="form-label">Material *</label>
+            <input type="text" class="form-input" id="g-material" required placeholder="Ex: Cola quente, Papel kraft..." list="materiais-sugeridos" autocomplete="off">
+            <datalist id="materiais-sugeridos"></datalist>
+          </div>
+          <div class="form-group"><label class="form-label">Quantidade</label><input type="number" step="0.001" class="form-input" id="g-qtd" value="1" oninput="calcTotalGasto()"></div>
+          <div class="form-group"><label class="form-label">Valor unitário (R$)</label><input type="number" step="0.01" class="form-input" id="g-valor-unit" placeholder="0,00" oninput="calcTotalGasto()"></div>
+          <div class="form-group"><label class="form-label">Total (R$)</label><input type="text" class="form-input" id="g-total" readonly style="background:#f9f6f2;font-weight:600;color:var(--terra)"></div>
+          <div class="form-group"><label class="form-label">Data *</label><input type="date" class="form-input" id="g-data"></div>
+          <div class="form-group fg-full"><label class="form-label">Observações</label><input type="text" class="form-input" id="g-obs" placeholder="Opcional..."></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('gasto-modal')">Cancelar</button><button class="btn btn-primary" onclick="salvarGasto()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL PRODUÇÃO EXTERNA -->
+<div class="modal-overlay" id="prod-ext-modal">
+  <div class="modal-box">
+    <div class="modal-header"><div class="modal-title" id="prod-ext-modal-title">Lançar Entrega</div><button class="modal-close" onclick="closeModal('prod-ext-modal')">✕</button></div>
+    <div class="modal-body">
+      <form id="form-prod-ext" onsubmit="return false">
+        <div class="form-grid">
+          <div class="form-group fg-full"><label class="form-label">Produtora *</label><input type="text" class="form-input" id="pe-produtora" required placeholder="Nome da produtora" list="produtoras-sugeridas" autocomplete="off"><datalist id="produtoras-sugeridas"></datalist></div>
+          <div class="form-group"><label class="form-label">Tipo de caixa *</label><input type="text" class="form-input" id="pe-tipo" required placeholder="Ex: Maleta, Caixa Lid-base..."></div>
+          <div class="form-group"><label class="form-label">Cor</label><input type="text" class="form-input" id="pe-cor" placeholder="Ex: Kraft, Azul..."></div>
+          <div class="form-group fg-full"><label class="form-label">Logotipo</label><input type="text" class="form-input" id="pe-logo" placeholder="Ex: Logo frente 4x4cm..."></div>
+          <div class="form-group"><label class="form-label">Quantidade</label><input type="number" class="form-input" id="pe-qtd" value="1" oninput="calcTotalProdExt()"></div>
+          <div class="form-group"><label class="form-label">Valor unitário (R$)</label><input type="number" step="0.01" class="form-input" id="pe-valor-unit" placeholder="0,00" oninput="calcTotalProdExt()"></div>
+          <div class="form-group"><label class="form-label">Total (R$)</label><input type="text" class="form-input" id="pe-total" readonly style="background:#f9f6f2;font-weight:600;color:var(--terra)"></div>
+          <div class="form-group"><label class="form-label">Data de entrega *</label><input type="date" class="form-input" id="pe-data"></div>
+          <div class="form-group fg-full"><label class="form-label">Observações</label><input type="text" class="form-input" id="pe-obs" placeholder="Opcional..."></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('prod-ext-modal')">Cancelar</button><button class="btn btn-primary" onclick="salvarProdExt()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL EXTRATO PRODUÇÃO EXTERNA -->
+<div class="modal-overlay" id="extrato-prod-ext-modal">
+  <div class="modal-box" style="max-width:760px">
+    <div class="modal-header"><div class="modal-title">🏭 Extrato — Produção Externa</div><button class="modal-close" onclick="closeModal('extrato-prod-ext-modal')">✕</button></div>
+    <div class="modal-body">
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+        <select class="form-select" id="filtro-produtora-extrato" style="width:220px" onchange="renderExtratoProdExt()"><option value="">Todas as produtoras</option></select>
+        <span style="font-size:12px;color:var(--kraft)">Total: <strong id="extrato-prod-total" style="color:var(--terra)">R$ 0,00</strong></span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Data</th><th>Produtora</th><th>Tipo</th><th>Cor</th><th>Logotipo</th><th>Qtd</th><th>Unit.</th><th>Total</th></tr></thead>
+          <tbody id="extrato-prod-ext-tbody"></tbody>
+        </table>
+      </div>
+      <div id="extrato-prod-ext-totais" style="margin-top:16px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('extrato-prod-ext-modal')">Fechar</button>
+      <button class="btn btn-primary" onclick="gerarPDFProdExt()">⬇ Baixar PDF</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="confirm-cliente-modal">
   <div class="confirm-box">
     <div class="confirm-icon">🗑️</div>
@@ -691,7 +796,7 @@ function showRegister() { document.getElementById('auth-screen').style.display =
 
 // ===== LOAD =====
 async function loadAll() {
-  await Promise.all([loadPedidos(), loadClientes(), loadEstoque(), loadEntregas(), loadFinanceiro(), loadPagamentos()]);
+  await Promise.all([loadPedidos(), loadClientes(), loadEstoque(), loadEntregas(), loadFinanceiro(), loadPagamentos(), loadGastos(), loadProdExt()]);
   renderDashboard();
 }
 
@@ -1574,13 +1679,13 @@ function sendWhatsapp() {
 }
 
 // ===== NAV =====
-const pageTitles = { dashboard:['Dashboard','Visão geral do ateliê'], pedidos:['Pedidos','Todos os pedidos sob encomenda'], clientes:['Clientes','Cadastro e histórico'], agenda:['Agenda de Entregas','Calendário de entregas'], financeiro:['Financeiro','Controle de entradas e saldos'], estoque:['Estoque','Matéria-prima e alertas'], 'novo-pedido':['Novo Pedido','Cadastrar pedido sob encomenda'] };
+const pageTitles = { dashboard:['Dashboard','Visão geral do ateliê'], pedidos:['Pedidos','Todos os pedidos sob encomenda'], clientes:['Clientes','Cadastro e histórico'], agenda:['Agenda de Entregas','Calendário de entregas'], financeiro:['Financeiro','Controle de entradas e saldos'], estoque:['Estoque','Matéria-prima e alertas'], 'novo-pedido':['Novo Pedido','Cadastrar pedido sob encomenda'], gastos:['Gastos','Registro de custos e compras'], 'producao-externa':['Produção Externa','Controle de produtoras externas'] };
 function nav(panel) {
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const el = document.getElementById('panel-'+panel);
   if (el) el.classList.add('active');
-  const navMap = { dashboard:0, pedidos:1, clientes:2, agenda:3, financeiro:4, estoque:5 };
+  const navMap = { dashboard:0, pedidos:1, clientes:2, agenda:3, financeiro:4, estoque:5, gastos:6, 'producao-externa':7 };
   const items = document.querySelectorAll('.nav-item');
   if (navMap[panel] !== undefined) items[navMap[panel]]?.classList.add('active');
   const cfg = pageTitles[panel] || ['',''];
@@ -1870,6 +1975,290 @@ async function gerarOrdemProducao(pedidoId) {
 
   doc.save(`ordem-producao-${String(pedido.numero).padStart(4,'0')}.pdf`);
   showToast('Ordem de producao gerada!','success');
+}
+
+// ===== GASTOS =====
+let allGastos = [];
+let editGasto = null;
+
+async function loadGastos() {
+  const { data } = await sb.from('gastos').select('*').eq('empresa_id', empresaId).order('data_gasto', { ascending: false });
+  allGastos = data || [];
+  renderGastos();
+  // Atualizar sugestões de materiais
+  const materiais = [...new Set(allGastos.map(g => g.material))];
+  const dl = document.getElementById('materiais-sugeridos');
+  if (dl) dl.innerHTML = materiais.map(m => `<option value="${m}">`).join('');
+}
+
+function renderGastos() {
+  const tb = document.getElementById('gastos-tbody');
+  if (!tb) return;
+  if (!allGastos.length) { tb.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🛒</div><div class="empty-text">Nenhum gasto lançado</div></div></td></tr>'; return; }
+  let total = 0;
+  tb.innerHTML = allGastos.map(g => {
+    total += g.valor_total || 0;
+    return `<tr>
+      <td>${fmtDate(g.data_gasto)}</td>
+      <td style="font-weight:500">${g.material}</td>
+      <td>${g.quantidade}</td>
+      <td>${fmt(g.valor_unitario)}</td>
+      <td style="font-weight:600;color:var(--terra)">${fmt(g.valor_total)}</td>
+      <td style="color:var(--kraft);font-size:12px">${g.observacoes||'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="editarGasto('${g.id}')" style="margin-right:4px">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="excluirGasto('${g.id}')" style="color:#D63B2F;border-color:#f5bfbf">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  const totalEl = document.getElementById('gastos-total');
+  if (totalEl) totalEl.textContent = fmt(total);
+}
+
+function calcTotalGasto() {
+  const qtd = parseFloat(document.getElementById('g-qtd')?.value)||0;
+  const unit = parseFloat(document.getElementById('g-valor-unit')?.value)||0;
+  const totalEl = document.getElementById('g-total');
+  if (totalEl) totalEl.value = fmt(qtd * unit);
+}
+
+async function salvarGasto() {
+  const material = document.getElementById('g-material').value.trim();
+  if (!material) { showToast('Preencha o material', 'error'); return; }
+  const qtd = parseFloat(document.getElementById('g-qtd').value)||1;
+  const unit = parseFloat(document.getElementById('g-valor-unit').value)||0;
+  const data = {
+    empresa_id: empresaId,
+    material,
+    quantidade: qtd,
+    valor_unitario: unit,
+    valor_total: Math.round(qtd * unit * 100) / 100,
+    data_gasto: document.getElementById('g-data').value || new Date().toISOString().split('T')[0],
+    observacoes: document.getElementById('g-obs').value || null
+  };
+  if (editGasto) {
+    await sb.from('gastos').update(data).eq('id', editGasto);
+    showToast('Gasto atualizado!', 'success');
+  } else {
+    await sb.from('gastos').insert(data);
+    showToast('Gasto lançado!', 'success');
+  }
+  closeModal('gasto-modal');
+  await loadGastos();
+}
+
+function editarGasto(id) {
+  const g = allGastos.find(x => x.id === id);
+  if (!g) return;
+  editGasto = id;
+  document.getElementById('gasto-modal-title').textContent = 'Editar Gasto';
+  document.getElementById('g-material').value = g.material;
+  document.getElementById('g-qtd').value = g.quantidade;
+  document.getElementById('g-valor-unit').value = g.valor_unitario;
+  document.getElementById('g-total').value = fmt(g.valor_total);
+  document.getElementById('g-data').value = g.data_gasto;
+  document.getElementById('g-obs').value = g.observacoes || '';
+  openModal('gasto-modal');
+}
+
+async function excluirGasto(id) {
+  if (!confirm('Excluir este gasto?')) return;
+  await sb.from('gastos').delete().eq('id', id);
+  showToast('Gasto removido', 'warning');
+  await loadGastos();
+}
+
+// ===== PRODUÇÃO EXTERNA =====
+let allProdExt = [];
+let editProdExt = null;
+
+async function loadProdExt() {
+  const { data } = await sb.from('producao_externa').select('*').eq('empresa_id', empresaId).order('data_entrega', { ascending: false });
+  allProdExt = data || [];
+  renderProdExt();
+  // Atualizar sugestões de produtoras
+  const produtoras = [...new Set(allProdExt.map(p => p.produtora))];
+  const dl = document.getElementById('produtoras-sugeridas');
+  if (dl) dl.innerHTML = produtoras.map(p => `<option value="${p}">`).join('');
+  // Atualizar filtro do extrato
+  const sel = document.getElementById('filtro-produtora-extrato');
+  if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Todas as produtoras</option>' + produtoras.map(p => `<option value="${p}">${p}</option>`).join('');
+    if (cur) sel.value = cur;
+  }
+}
+
+function renderProdExt() {
+  const tb = document.getElementById('prod-ext-tbody');
+  if (!tb) return;
+  if (!allProdExt.length) { tb.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🏭</div><div class="empty-text">Nenhuma entrega lançada</div></div></td></tr>'; return; }
+  tb.innerHTML = allProdExt.map(p => `<tr>
+    <td>${fmtDate(p.data_entrega)}</td>
+    <td style="font-weight:500">${p.produtora}</td>
+    <td>${p.tipo_caixa}</td>
+    <td>${p.cor||'—'}</td>
+    <td style="font-size:11px;color:var(--kraft)">${p.logotipo||'—'}</td>
+    <td style="font-weight:600">${p.quantidade}</td>
+    <td>${fmt(p.valor_unitario)}</td>
+    <td style="font-weight:600;color:var(--terra)">${fmt(p.valor_total)}</td>
+    <td style="color:var(--kraft);font-size:12px">${p.observacoes||'—'}</td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-ghost btn-sm" onclick="editarProdExt('${p.id}')" style="margin-right:4px">✏️</button>
+      <button class="btn btn-ghost btn-sm" onclick="excluirProdExt('${p.id}')" style="color:#D63B2F;border-color:#f5bfbf">🗑️</button>
+    </td>
+  </tr>`).join('');
+}
+
+function calcTotalProdExt() {
+  const qtd = parseFloat(document.getElementById('pe-qtd')?.value)||0;
+  const unit = parseFloat(document.getElementById('pe-valor-unit')?.value)||0;
+  const totalEl = document.getElementById('pe-total');
+  if (totalEl) totalEl.value = fmt(qtd * unit);
+}
+
+async function salvarProdExt() {
+  const produtora = document.getElementById('pe-produtora').value.trim();
+  const tipo = document.getElementById('pe-tipo').value.trim();
+  if (!produtora || !tipo) { showToast('Preencha produtora e tipo de caixa', 'error'); return; }
+  const qtd = parseInt(document.getElementById('pe-qtd').value)||1;
+  const unit = parseFloat(document.getElementById('pe-valor-unit').value)||0;
+  const data = {
+    empresa_id: empresaId,
+    produtora,
+    tipo_caixa: tipo,
+    cor: document.getElementById('pe-cor').value || null,
+    logotipo: document.getElementById('pe-logo').value || null,
+    quantidade: qtd,
+    valor_unitario: unit,
+    valor_total: Math.round(qtd * unit * 100) / 100,
+    data_entrega: document.getElementById('pe-data').value || new Date().toISOString().split('T')[0],
+    observacoes: document.getElementById('pe-obs').value || null
+  };
+  if (editProdExt) {
+    await sb.from('producao_externa').update(data).eq('id', editProdExt);
+    showToast('Registro atualizado!', 'success');
+  } else {
+    await sb.from('producao_externa').insert(data);
+    showToast('Entrega lançada!', 'success');
+  }
+  closeModal('prod-ext-modal');
+  await loadProdExt();
+}
+
+function editarProdExt(id) {
+  const p = allProdExt.find(x => x.id === id);
+  if (!p) return;
+  editProdExt = id;
+  document.getElementById('prod-ext-modal-title').textContent = 'Editar Entrega';
+  document.getElementById('pe-produtora').value = p.produtora;
+  document.getElementById('pe-tipo').value = p.tipo_caixa;
+  document.getElementById('pe-cor').value = p.cor || '';
+  document.getElementById('pe-logo').value = p.logotipo || '';
+  document.getElementById('pe-qtd').value = p.quantidade;
+  document.getElementById('pe-valor-unit').value = p.valor_unitario;
+  document.getElementById('pe-total').value = fmt(p.valor_total);
+  document.getElementById('pe-data').value = p.data_entrega;
+  document.getElementById('pe-obs').value = p.observacoes || '';
+  openModal('prod-ext-modal');
+}
+
+async function excluirProdExt(id) {
+  if (!confirm('Excluir este registro?')) return;
+  await sb.from('producao_externa').delete().eq('id', id);
+  showToast('Registro removido', 'warning');
+  await loadProdExt();
+}
+
+function gerarExtratoProdExt() {
+  openModal('extrato-prod-ext-modal');
+  renderExtratoProdExt();
+}
+
+function renderExtratoProdExt() {
+  const filtro = document.getElementById('filtro-produtora-extrato')?.value || '';
+  const dados = filtro ? allProdExt.filter(p => p.produtora === filtro) : allProdExt;
+  const tb = document.getElementById('extrato-prod-ext-tbody');
+  if (!tb) return;
+  if (!dados.length) { tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🏭</div><div class="empty-text">Nenhum registro encontrado</div></div></td></tr>'; return; }
+  let totalGeral = 0;
+  tb.innerHTML = dados.map(p => {
+    totalGeral += p.valor_total || 0;
+    return `<tr>
+      <td>${fmtDate(p.data_entrega)}</td>
+      <td style="font-weight:500">${p.produtora}</td>
+      <td>${p.tipo_caixa}</td>
+      <td>${p.cor||'—'}</td>
+      <td style="font-size:11px">${p.logotipo||'—'}</td>
+      <td style="font-weight:600">${p.quantidade}</td>
+      <td>${fmt(p.valor_unitario)}</td>
+      <td style="font-weight:600;color:var(--terra)">${fmt(p.valor_total)}</td>
+    </tr>`;
+  }).join('');
+  const totalEl = document.getElementById('extrato-prod-total');
+  if (totalEl) totalEl.textContent = fmt(totalGeral);
+  // Totais por produtora
+  const porProdutora = {};
+  dados.forEach(p => { porProdutora[p.produtora] = (porProdutora[p.produtora]||0) + p.valor_total; });
+  const totaisEl = document.getElementById('extrato-prod-ext-totais');
+  if (totaisEl) {
+    totaisEl.innerHTML = `<div style="background:var(--cream);border-radius:10px;padding:14px 16px;border:1px solid var(--tan)">
+      ${Object.entries(porProdutora).map(([nome, val]) => `
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+          <span style="color:var(--kraft)">${nome}</span>
+          <span style="font-weight:600">${fmt(val)}</span>
+        </div>`).join('')}
+      <div style="background:var(--dark);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span style="color:rgba(245,240,232,.65);font-size:12px">TOTAL GERAL</span>
+        <span style="color:white;font-family:'DM Serif Display',serif;font-size:20px">${fmt(totalGeral)}</span>
+      </div>
+    </div>`;
+  }
+}
+
+async function gerarPDFProdExt() {
+  const { jsPDF } = window.jspdf;
+  const filtro = document.getElementById('filtro-produtora-extrato')?.value || '';
+  const dados = filtro ? allProdExt.filter(p => p.produtora === filtro) : allProdExt;
+  const doc = new jsPDF({ orientation: 'landscape' });
+  let y = 0;
+  doc.setFillColor(61,43,26); doc.rect(0,0,297,18,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+  doc.text('Atelie Studio — Extrato de Producao Externa', 10, 12);
+  doc.setFontSize(9); doc.setTextColor(196,168,130);
+  doc.text(filtro ? `Produtora: ${filtro}` : 'Todas as produtoras', 10, 17);
+  doc.setTextColor(255,255,255); doc.setFontSize(9);
+  doc.text(new Date().toLocaleDateString('pt-BR'), 287, 12, { align: 'right' });
+  y = 26;
+  doc.setFillColor(61,43,26); doc.rect(8,y-4,281,8,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+  doc.text('DATA',10,y+1); doc.text('PRODUTORA',30,y+1); doc.text('TIPO',85,y+1);
+  doc.text('COR',130,y+1); doc.text('LOGOTIPO',155,y+1); doc.text('QTD',205,y+1);
+  doc.text('UNIT.',220,y+1); doc.text('TOTAL',255,y+1); y+=8;
+  let totalGeral = 0;
+  dados.forEach((p, idx) => {
+    if (idx%2===0){doc.setFillColor(252,249,245);doc.rect(8,y-4,281,8,'F');}
+    doc.setTextColor(0); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    doc.text(fmtDate(p.data_entrega),10,y+1);
+    doc.setFont('helvetica','bold'); doc.text(p.produtora.substring(0,22),30,y+1);
+    doc.setFont('helvetica','normal'); doc.text(p.tipo_caixa.substring(0,20),85,y+1);
+    doc.text((p.cor||'—').substring(0,12),130,y+1);
+    doc.text((p.logotipo||'—').substring(0,18),155,y+1);
+    doc.text(String(p.quantidade),205,y+1);
+    doc.text(fmt(p.valor_unitario),220,y+1);
+    doc.setFont('helvetica','bold'); doc.setTextColor(196,82,42);
+    doc.text(fmt(p.valor_total),255,y+1);
+    doc.setTextColor(0); totalGeral += p.valor_total||0; y+=8;
+    if(y>190){doc.addPage();y=15;}
+  });
+  y+=4;
+  doc.setFillColor(61,43,26); doc.rect(8,y-3,281,10,'F');
+  doc.setTextColor(196,168,130); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text('TOTAL GERAL',10,y+4);
+  doc.setTextColor(255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text(fmt(totalGeral),287,y+4,{align:'right'});
+  doc.save('extrato-producao-externa.pdf');
+  showToast('PDF gerado!', 'success');
 }
 
 // ===== EXCLUSÃO DE CLIENTE =====
