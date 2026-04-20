@@ -1129,7 +1129,7 @@ function renderAgenda() {
       <td style="${atrasado?'color:var(--r);font-weight:600':''}">${fmtDate(e.data_prevista)}${atrasado?' ⚠':''}</td>
       <td style="color:var(--terra);font-weight:600">#${String(e.pedidos?.numero||0).padStart(4,'0')}</td>
       <td>${e.pedidos?.clientes?.razao_social||'—'}</td>
-      <td>${e.quantidade} un</td>
+      <td>${e.quantidade} un${e.modelo ? ' · <span style="color:var(--brown);font-size:11px">' + e.modelo + '</span>' : ''}</td>
       <td><span class="status ${sc}">${sl}</span></td>
       <td><button class="btn btn-ghost btn-sm" onclick="atualizarEntrega('${e.id}','${e.pedido_id}','${e.status}','${e.data_realizada||''}')">Atualizar</button></td>
     </tr>`;
@@ -1281,9 +1281,10 @@ function addEntregaForm() {
   entregaFormCount++;
   const div = document.createElement('div');
   div.id = 'ent-form-'+entregaFormCount;
-  div.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;background:var(--cream);border-radius:8px;border:1px solid var(--tan)';
+  div.style.cssText = 'display:grid;grid-template-columns:2fr 80px 1fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;background:var(--cream);border-radius:8px;border:1px solid var(--tan)';
   div.innerHTML = `
-    <div class="form-group" style="margin:0"><label class="form-label">Quantidade</label><input type="number" class="form-input" id="ent-qtd-${entregaFormCount}" placeholder="0"></div>
+    <div class="form-group" style="margin:0"><label class="form-label">Modelo</label><input type="text" class="form-input" id="ent-modelo-${entregaFormCount}" placeholder="Ex: Maleta Alta"></div>
+    <div class="form-group" style="margin:0"><label class="form-label">Quantidade</label><input type="number" class="form-input" id="ent-qtd-${entregaFormCount}" placeholder="0" style="width:80px"></div>
     <div class="form-group" style="margin:0"><label class="form-label">Data prevista</label><input type="date" class="form-input" id="ent-data-${entregaFormCount}"></div>
     <button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">×</button>`;
   document.getElementById('entregas-form-list').appendChild(div);
@@ -1348,7 +1349,8 @@ async function salvarPedido() {
     for (let i = 1; i <= entregaFormCount; i++) {
       const qtdE = parseInt(document.getElementById('ent-qtd-'+i)?.value)||0;
       const dataE = document.getElementById('ent-data-'+i)?.value;
-      if (qtdE && dataE) await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE });
+      const modeloE = document.getElementById('ent-modelo-'+i)?.value || '';
+      if (qtdE && dataE) await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE, modelo: modeloE || null });
     }
     showToast(editPedidoId ? 'Pedido atualizado!' : 'Pedido criado com sucesso!', 'success');
     // Reload completo para garantir dados frescos do banco
@@ -1597,7 +1599,7 @@ async function loadPdfPreview() {
       </div>
       <div class="pdf-sec-title">Itens</div>
       ${itensComTotal.map(it=>`<div class="pdf-item-row"><span><b>${it.modelo}</b> · ${it.cor||''} · ${it.logotipo||''}</span><span>${it.quantidade} × ${fmt(it.valor_unitario)} = ${fmt(it.valor_total_calc)}</span></div>`).join('')}
-      ${entregas?.length ? `<div class="pdf-sec-title" style="margin-top:12px">Entregas</div>${entregas.map(e=>`<div class="pdf-row"><span class="pdf-lbl">${fmtDate(e.data_prevista)}</span><span class="pdf-val">${e.quantidade} un — ${e.status}</span></div>`).join('')}` : ''}
+      ${entregas?.length ? `<div class="pdf-sec-title" style="margin-top:12px">Entregas</div>${entregas.map(e=>`<div class="pdf-row"><span class="pdf-lbl">${fmtDate(e.data_prevista)}</span><span class="pdf-val">${e.quantidade} un${e.modelo ? ' · ' + e.modelo : ''} — ${e.status}</span></div>`).join('')}` : ''}
       <div class="fin-total"><span class="fin-total-lbl">Valor total</span><span class="fin-total-val">${fmt(valorTotalExibir)}</span></div>
       <div class="fin-saldo"><span style="font-size:12px;color:#7a3010;font-weight:500">Total recebido: ${fmt(recebido)}</span><span style="font-size:14px;color:var(--terra);font-weight:700">Saldo: ${fmt(saldo)}</span></div>
       <div style="margin-top:12px;font-size:10px;color:var(--kraft);line-height:1.6"><b>Termos:</b> Prazo de produção conforme acordado. Entrega condicionada ao pagamento do saldo pendente.</div>
@@ -1672,7 +1674,10 @@ async function gerarPDF() {
     entregas.forEach((e,idx)=>{
       if(idx%2===0){doc.setFillColor(252,249,245);doc.rect(20,y-4,170,7,'F');}
       doc.setTextColor(0);doc.text(fmtDate(e.data_prevista),22,y);doc.text(`${e.quantidade} unidades`,100,y);
-      doc.text(e.status==='entregue'?'Entregue':e.status==='atrasado'?'Atrasado':'Pendente',160,y);y+=7;
+      const statusTxt = e.status==='entregue'?'Entregue':e.status==='atrasado'?'Atrasado':'Pendente';
+      doc.text(statusTxt,160,y);
+      if(e.modelo){doc.setFontSize(8);doc.setTextColor(120);doc.text(e.modelo.substring(0,20),100,y+4);doc.setFontSize(10);doc.setTextColor(0);}
+      y+=e.modelo?10:7;
     });
     y+=3;
   }
@@ -1982,7 +1987,7 @@ async function gerarOrdemProducao(pedidoId) {
     doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(139,111,71);
     doc.text('ENTREGAS:',10,y);
     doc.setFont('helvetica','normal'); doc.setTextColor(0); doc.setFontSize(8);
-    const etxt = entregas.map(e=>`${fmtDate(e.data_prevista)} — ${e.quantidade} un`).join('   ');
+    const etxt = entregas.map(e=>`${fmtDate(e.data_prevista)} — ${e.quantidade} un${e.modelo ? ' ('+e.modelo+')' : ''}`).join('   ');
     doc.text(etxt,40,y); y+=8;
     doc.setLineWidth(0.3); doc.line(8,y,W-8,y); y+=5;
   }
@@ -2080,13 +2085,16 @@ async function salvarGasto() {
     observacoes: document.getElementById('g-obs').value || null
   };
   if (editGasto) {
-    await sb.from('gastos').update(data).eq('id', editGasto);
+    const { error } = await sb.from('gastos').update(data).eq('id', editGasto);
+    if (error) { showToast('Erro: ' + error.message, 'error'); return; }
     showToast('Gasto atualizado!', 'success');
   } else {
-    await sb.from('gastos').insert(data);
+    const { error } = await sb.from('gastos').insert(data);
+    if (error) { showToast('Erro: ' + error.message, 'error'); return; }
     showToast('Gasto lançado!', 'success');
   }
   closeModal('gasto-modal');
+  editGasto = null;
   await loadGastos();
 }
 
@@ -2179,13 +2187,16 @@ async function salvarProdExt() {
     observacoes: document.getElementById('pe-obs').value || null
   };
   if (editProdExt) {
-    await sb.from('producao_externa').update(data).eq('id', editProdExt);
+    const { error } = await sb.from('producao_externa').update(data).eq('id', editProdExt);
+    if (error) { showToast('Erro: ' + error.message, 'error'); return; }
     showToast('Registro atualizado!', 'success');
   } else {
-    await sb.from('producao_externa').insert(data);
+    const { error } = await sb.from('producao_externa').insert(data);
+    if (error) { showToast('Erro: ' + error.message, 'error'); return; }
     showToast('Entrega lançada!', 'success');
   }
   closeModal('prod-ext-modal');
+  editProdExt = null;
   await loadProdExt();
 }
 
