@@ -611,7 +611,19 @@ textarea.form-input{resize:vertical;min-height:60px}
       <button class="modal-close" onclick="closeModal('extrato-modal')">✕</button>
     </div>
     <div class="modal-body">
-      <div id="extrato-resumo-cliente" style="background:var(--cream);border-radius:10px;padding:14px 16px;margin-bottom:18px;border:1px solid var(--tan)"></div>
+      <div id="extrato-resumo-cliente" style="background:var(--cream);border-radius:10px;padding:14px 16px;margin-bottom:14px;border:1px solid var(--tan)"></div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:11px;color:var(--kraft);white-space:nowrap">De:</label>
+          <input type="date" class="form-input" id="extrato-data-inicio" style="width:140px">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:11px;color:var(--kraft);white-space:nowrap">Até:</label>
+          <input type="date" class="form-input" id="extrato-data-fim" style="width:140px">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="filtrarExtrato()">🔍 Filtrar</button>
+        <button class="btn btn-ghost btn-sm" onclick="limparFiltroExtrato()">Limpar</button>
+      </div>
       <div class="extrato-head">
         <span>Pedido</span><span>Itens</span><span>Data</span><span>Entrega</span><span>Valor</span><span>Saldo</span>
       </div>
@@ -678,7 +690,16 @@ textarea.form-input{resize:vertical;min-height:60px}
     <div class="modal-header"><div class="modal-title">🏭 Extrato — Produção Externa</div><button class="modal-close" onclick="closeModal('extrato-prod-ext-modal')">✕</button></div>
     <div class="modal-body">
       <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
-        <select class="form-select" id="filtro-produtora-extrato" style="width:220px" onchange="renderExtratoProdExt()"><option value="">Todas as produtoras</option></select>
+        <select class="form-select" id="filtro-produtora-extrato" style="width:200px" onchange="renderExtratoProdExt()"><option value="">Todas as produtoras</option></select>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:11px;color:var(--kraft);white-space:nowrap">De:</label>
+          <input type="date" class="form-input" id="pe-data-inicio" style="width:140px" onchange="renderExtratoProdExt()">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:11px;color:var(--kraft);white-space:nowrap">Até:</label>
+          <input type="date" class="form-input" id="pe-data-fim" style="width:140px" onchange="renderExtratoProdExt()">
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="limparFiltrosProdExt()">Limpar</button>
         <span style="font-size:12px;color:var(--kraft)">Total: <strong id="extrato-prod-total" style="color:var(--terra)">R$ 0,00</strong></span>
       </div>
       <div class="table-wrap">
@@ -1718,10 +1739,14 @@ async function abrirExtrato(clienteId) {
       <div style="font-size:11px;color:var(--kraft)">Extrato gerado em ${new Date().toLocaleDateString('pt-BR')}</div>
     </div>`;
 
-  const pedidosCliente = allPedidos.filter(p => p.cliente_id === clienteId);
+  const dataInicio = document.getElementById('extrato-data-inicio')?.value || '';
+  const dataFim = document.getElementById('extrato-data-fim')?.value || '';
+  let pedidosCliente = allPedidos.filter(p => p.cliente_id === clienteId);
+  if (dataInicio) pedidosCliente = pedidosCliente.filter(p => p.data_pedido >= dataInicio);
+  if (dataFim) pedidosCliente = pedidosCliente.filter(p => p.data_pedido <= dataFim);
 
   if (!pedidosCliente.length) {
-    document.getElementById('extrato-lista').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido para este cliente</div></div>';
+    document.getElementById('extrato-lista').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhum pedido encontrado no período</div></div>';
     document.getElementById('extrato-totais').innerHTML = '';
     openModal('extrato-modal');
     return;
@@ -1767,20 +1792,38 @@ async function abrirExtrato(clienteId) {
   openModal('extrato-modal');
 }
 
+function limparFiltroExtrato() {
+  document.getElementById('extrato-data-inicio').value = '';
+  document.getElementById('extrato-data-fim').value = '';
+  abrirExtrato(extratoClienteId);
+}
+
+async function filtrarExtrato() {
+  await abrirExtrato(extratoClienteId);
+}
+
 async function gerarPDFExtrato() {
   const { jsPDF } = window.jspdf;
   const cliente = allClientes.find(c => c.id === extratoClienteId);
   if (!cliente) return;
-  const pedidosCliente = allPedidos.filter(p => p.cliente_id === extratoClienteId);
+  const dataInicio = document.getElementById('extrato-data-inicio')?.value || '';
+  const dataFim = document.getElementById('extrato-data-fim')?.value || '';
+  let pedidosCliente = allPedidos.filter(p => p.cliente_id === extratoClienteId);
+  if (dataInicio) pedidosCliente = pedidosCliente.filter(p => p.data_pedido >= dataInicio);
+  if (dataFim) pedidosCliente = pedidosCliente.filter(p => p.data_pedido <= dataFim);
   const doc = new jsPDF();
   let y = 0;
 
   // Cabeçalho escuro
-  doc.setFillColor(61,43,26); doc.rect(0,0,210,28,'F');
+  doc.setFillColor(61,43,26); doc.rect(0,0,210,30,'F');
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
   doc.text('Atelie Studio',20,12);
   doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(196,168,130);
   doc.text('Extrato de Pedidos do Cliente',20,20);
+  if (dataInicio || dataFim) {
+    doc.setFontSize(8);
+    doc.text(`Periodo: ${dataInicio ? fmtDate(dataInicio) : 'inicio'} ate ${dataFim ? fmtDate(dataFim) : 'hoje'}`, 20, 27);
+  }
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
   doc.text(new Date().toLocaleDateString('pt-BR'),190,12,{align:'right'});
 
@@ -2175,9 +2218,20 @@ function gerarExtratoProdExt() {
   renderExtratoProdExt();
 }
 
+function limparFiltrosProdExt() {
+  document.getElementById('pe-data-inicio').value = '';
+  document.getElementById('pe-data-fim').value = '';
+  document.getElementById('filtro-produtora-extrato').value = '';
+  renderExtratoProdExt();
+}
+
 function renderExtratoProdExt() {
   const filtro = document.getElementById('filtro-produtora-extrato')?.value || '';
-  const dados = filtro ? allProdExt.filter(p => p.produtora === filtro) : allProdExt;
+  const dataInicio = document.getElementById('pe-data-inicio')?.value || '';
+  const dataFim = document.getElementById('pe-data-fim')?.value || '';
+  let dados = filtro ? allProdExt.filter(p => p.produtora === filtro) : allProdExt;
+  if (dataInicio) dados = dados.filter(p => p.data_entrega >= dataInicio);
+  if (dataFim) dados = dados.filter(p => p.data_entrega <= dataFim);
   const tb = document.getElementById('extrato-prod-ext-tbody');
   if (!tb) return;
   if (!dados.length) { tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🏭</div><div class="empty-text">Nenhum registro encontrado</div></div></td></tr>'; return; }
@@ -2219,14 +2273,20 @@ function renderExtratoProdExt() {
 async function gerarPDFProdExt() {
   const { jsPDF } = window.jspdf;
   const filtro = document.getElementById('filtro-produtora-extrato')?.value || '';
-  const dados = filtro ? allProdExt.filter(p => p.produtora === filtro) : allProdExt;
+  const dataInicio = document.getElementById('pe-data-inicio')?.value || '';
+  const dataFim = document.getElementById('pe-data-fim')?.value || '';
+  let dados = filtro ? allProdExt.filter(p => p.produtora === filtro) : allProdExt;
+  if (dataInicio) dados = dados.filter(p => p.data_entrega >= dataInicio);
+  if (dataFim) dados = dados.filter(p => p.data_entrega <= dataFim);
   const doc = new jsPDF({ orientation: 'landscape' });
   let y = 0;
-  doc.setFillColor(61,43,26); doc.rect(0,0,297,18,'F');
+  doc.setFillColor(61,43,26); doc.rect(0,0,297,20,'F');
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(13);
-  doc.text('Atelie Studio — Extrato de Producao Externa', 10, 12);
-  doc.setFontSize(9); doc.setTextColor(196,168,130);
-  doc.text(filtro ? `Produtora: ${filtro}` : 'Todas as produtoras', 10, 17);
+  doc.text('Atelie Studio — Extrato de Producao Externa', 10, 11);
+  doc.setFontSize(8); doc.setTextColor(196,168,130);
+  let subtitulo = filtro ? `Produtora: ${filtro}` : 'Todas as produtoras';
+  if (dataInicio || dataFim) subtitulo += ` | Periodo: ${dataInicio ? fmtDate(dataInicio) : 'inicio'} ate ${dataFim ? fmtDate(dataFim) : 'hoje'}`;
+  doc.text(subtitulo, 10, 18);
   doc.setTextColor(255,255,255); doc.setFontSize(9);
   doc.text(new Date().toLocaleDateString('pt-BR'), 287, 12, { align: 'right' });
   y = 26;
