@@ -177,6 +177,7 @@ textarea.form-input{resize:vertical;min-height:60px}
 .extrato-row{display:grid;grid-template-columns:55px 1fr 70px 70px 75px 72px;gap:4px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--tan);font-size:12px}
 .extrato-row:hover{background:var(--cream)}
 .extrato-head{background:var(--cream);font-size:10px;font-weight:600;color:var(--kraft);text-transform:uppercase;letter-spacing:.5px;border-radius:6px;padding:6px 10px;margin-bottom:4px;display:grid;grid-template-columns:55px 1fr 70px 70px 75px 72px;gap:4px}
+.cor-item{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 10px;background:var(--cream);border-radius:6px;border:1px solid var(--tan)}
 @media(max-width:768px){
   .sidebar{width:56px}
   .sidebar .logo-text,.sidebar .nav-item span,.sidebar .nav-label,.sidebar .badge,.sidebar .user-name{display:none}
@@ -375,7 +376,7 @@ textarea.form-input{resize:vertical;min-height:60px}
       <!-- PRODUÇÃO EXTERNA -->
       <div class="panel" id="panel-producao-externa">
         <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
-          <button class="btn btn-primary btn-sm" onclick="openModal('prod-ext-modal');editProdExt=null;document.getElementById('form-prod-ext').reset();document.getElementById('pe-data').value=new Date().toISOString().split('T')[0]">+ Lançar entrega</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('prod-ext-modal');editProdExt=null;document.getElementById('form-prod-ext').reset();document.getElementById('pe-data').value=new Date().toISOString().split('T')[0];document.getElementById('pe-cores-lista').innerHTML='';coresProdExtCount=0;addCorProdExt()">+ Lançar entrega</button>
           <button class="btn btn-ghost btn-sm" onclick="gerarExtratoProdExt()">📊 Extrato completo</button>
         </div>
         <div class="card">
@@ -664,15 +665,20 @@ textarea.form-input{resize:vertical;min-height:60px}
 <!-- MODAL PRODUÇÃO EXTERNA -->
 <div class="modal-overlay" id="prod-ext-modal">
   <div class="modal-box">
-    <div class="modal-header"><div class="modal-title" id="prod-ext-modal-title">Lançar Entrega</div><button class="modal-close" onclick="closeModal('prod-ext-modal')">✕</button></div>
+    <div class="modal-header"><div class="modal-title" id="prod-ext-modal-title">Lançar Entrega</div><button class="modal-close" onclick="closeModal('prod-ext-modal');document.getElementById('pe-cores-lista').innerHTML='';coresProdExtCount=0">✕</button></div>
     <div class="modal-body">
       <form id="form-prod-ext" onsubmit="return false">
         <div class="form-grid">
           <div class="form-group fg-full"><label class="form-label">Produtora *</label><input type="text" class="form-input" id="pe-produtora" required placeholder="Nome da produtora" list="produtoras-sugeridas" autocomplete="off"><datalist id="produtoras-sugeridas"></datalist></div>
           <div class="form-group"><label class="form-label">Tipo de caixa *</label><input type="text" class="form-input" id="pe-tipo" required placeholder="Ex: Maleta, Caixa Lid-base..."></div>
-          <div class="form-group"><label class="form-label">Cor</label><input type="text" class="form-input" id="pe-cor" placeholder="Ex: Kraft, Azul..."></div>
+          <input type="hidden" id="pe-cor" value="">
           <div class="form-group fg-full"><label class="form-label">Logotipo</label><input type="text" class="form-input" id="pe-logo" placeholder="Ex: Logo frente 4x4cm..."></div>
-          <div class="form-group"><label class="form-label">Quantidade</label><input type="number" class="form-input" id="pe-qtd" value="1" oninput="calcTotalProdExt()"></div>
+          <div class="form-group fg-full">
+            <label class="form-label">Cores e quantidades</label>
+            <div id="pe-cores-lista" style="margin-bottom:6px"></div>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="addCorProdExt()">+ Adicionar cor</button>
+          </div>
+          <div class="form-group"><label class="form-label">Quantidade total</label><input type="number" class="form-input" id="pe-qtd" value="1" oninput="calcTotalProdExt()" readonly style="background:#f9f6f2"></div>
           <div class="form-group"><label class="form-label">Valor unitário (R$)</label><input type="number" step="0.01" class="form-input" id="pe-valor-unit" placeholder="0,00" oninput="calcTotalProdExt()"></div>
           <div class="form-group"><label class="form-label">Total (R$)</label><input type="text" class="form-input" id="pe-total" readonly style="background:#f9f6f2;font-weight:600;color:var(--terra)"></div>
           <div class="form-group"><label class="form-label">Data de entrega *</label><input type="date" class="form-input" id="pe-data"></div>
@@ -1131,7 +1137,10 @@ function renderAgenda() {
       <td>${e.pedidos?.clientes?.razao_social||'—'}</td>
       <td>${e.quantidade} un${e.modelo ? ' · <span style="color:var(--brown);font-size:11px">' + e.modelo + '</span>' : ''}</td>
       <td><span class="status ${sc}">${sl}</span></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="atualizarEntrega('${e.id}','${e.pedido_id}','${e.status}','${e.data_realizada||''}')">Atualizar</button></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="atualizarEntrega('${e.id}','${e.pedido_id}','${e.status}','${e.data_realizada||''}')" style="margin-right:4px">Atualizar</button>
+        <button class="btn btn-ghost btn-sm" onclick="excluirEntregaAgenda('${e.id}')" style="color:#D63B2F;border-color:#f5bfbf" title="Excluir">🗑️</button>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -1350,7 +1359,16 @@ async function salvarPedido() {
       const qtdE = parseInt(document.getElementById('ent-qtd-'+i)?.value)||0;
       const dataE = document.getElementById('ent-data-'+i)?.value;
       const modeloE = document.getElementById('ent-modelo-'+i)?.value || '';
-      if (qtdE && dataE) await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE, modelo: modeloE || null });
+      if (!qtdE || !dataE) continue;
+      const divE = document.getElementById('ent-form-'+i);
+      const entregaId = divE?.getAttribute('data-entrega-id');
+      if (entregaId) {
+        // Atualizar entrega existente
+        await sb.from('entregas').update({ quantidade: qtdE, data_prevista: dataE, modelo: modeloE||null }).eq('id', entregaId);
+      } else {
+        // Nova entrega
+        await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE, modelo: modeloE||null });
+      }
     }
     showToast(editPedidoId ? 'Pedido atualizado!' : 'Pedido criado com sucesso!', 'success');
     // Reload completo para garantir dados frescos do banco
@@ -1439,7 +1457,33 @@ async function editarPedido(id) {
   // Após carregar os itens, recalcular com taxa se existir
   const taxaSalva = parseFloat(document.getElementById('p-taxa-cartao').value)||0;
   if (taxaSalva > 0) calcSaldo();
+
+  // Carregar entregas existentes no formulário
+  document.getElementById('entregas-form-list').innerHTML = '';
+  entregaFormCount = 0;
+  const { data: entregasExist } = await sb.from('entregas').select('*').eq('pedido_id', id).order('data_prevista');
+  (entregasExist||[]).forEach(e => {
+    entregaFormCount++;
+    const div = document.createElement('div');
+    div.id = 'ent-form-'+entregaFormCount;
+    div.style.cssText = 'display:grid;grid-template-columns:2fr 80px 1fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;background:var(--cream);border-radius:8px;border:1px solid var(--tan)';
+    div.setAttribute('data-entrega-id', e.id);
+    div.innerHTML = `
+      <div class="form-group" style="margin:0"><label class="form-label">Modelo</label><input type="text" class="form-input" id="ent-modelo-${entregaFormCount}" value="${(e.modelo||'').replace(/"/g,'&quot;')}" placeholder="Ex: Maleta Alta"></div>
+      <div class="form-group" style="margin:0"><label class="form-label">Quantidade</label><input type="number" class="form-input" id="ent-qtd-${entregaFormCount}" value="${e.quantidade}" placeholder="0" style="width:80px"></div>
+      <div class="form-group" style="margin:0"><label class="form-label">Data prevista</label><input type="date" class="form-input" id="ent-data-${entregaFormCount}" value="${e.data_prevista||''}"></div>
+      <button class="btn btn-danger btn-sm" onclick="excluirEntregaForm('${e.id}','ent-form-${entregaFormCount}')">🗑️</button>`;
+    document.getElementById('entregas-form-list').appendChild(div);
+  });
+
   nav('novo-pedido');
+}
+
+async function excluirEntregaForm(entregaId, divId) {
+  if (!confirm('Excluir esta entrega?')) return;
+  if (entregaId) await sb.from('entregas').delete().eq('id', entregaId);
+  document.getElementById(divId)?.remove();
+  showToast('Entrega removida', 'warning');
 }
 
 // ===== EXCLUSÃO =====
@@ -1535,6 +1579,14 @@ async function salvarMovimentacao() {
 }
 
 // ===== ENTREGA =====
+async function excluirEntregaAgenda(id) {
+  if (!confirm('Excluir esta entrega do histórico?')) return;
+  await sb.from('entregas').delete().eq('id', id);
+  showToast('Entrega excluída', 'warning');
+  await loadEntregas();
+  renderDashboard();
+}
+
 function atualizarEntrega(id, pedidoId, status, dataReal) {
   document.getElementById('es-id').value = id;
   document.getElementById('es-pedido-id').value = pedidoId;
@@ -2148,7 +2200,7 @@ function renderProdExt() {
     <td>${fmtDate(p.data_entrega)}</td>
     <td style="font-weight:500">${p.produtora}</td>
     <td>${p.tipo_caixa}</td>
-    <td>${p.cor||'—'}</td>
+    <td style="font-size:11px">${(() => { try { const cs=JSON.parse(p.cor||''); return Array.isArray(cs)?cs.map(c=>c.quantidade+'x '+c.cor).join(', '):(p.cor||'—'); } catch(e){ return p.cor||'—'; } })()}</td>
     <td style="font-size:11px;color:var(--kraft)">${p.logotipo||'—'}</td>
     <td style="font-weight:600">${p.quantidade}</td>
     <td>${fmt(p.valor_unitario)}</td>
@@ -2159,6 +2211,38 @@ function renderProdExt() {
       <button class="btn btn-ghost btn-sm" onclick="excluirProdExt('${p.id}')" style="color:#D63B2F;border-color:#f5bfbf">🗑️</button>
     </td>
   </tr>`).join('');
+}
+
+let coresProdExtCount = 0;
+
+function addCorProdExt(cor='', qtd='') {
+  coresProdExtCount++;
+  const div = document.createElement('div');
+  div.className = 'cor-item';
+  div.id = 'cor-item-'+coresProdExtCount;
+  div.innerHTML = `
+    <input type="text" class="form-input" id="cor-nome-${coresProdExtCount}" placeholder="Ex: Preta, Bege..." value="${cor}" style="flex:1" oninput="recalcQtdTotal()">
+    <input type="number" class="form-input" id="cor-qtd-${coresProdExtCount}" placeholder="Qtd" value="${qtd}" style="width:80px" oninput="recalcQtdTotal()">
+    <button type="button" class="remove-item" onclick="document.getElementById('cor-item-${coresProdExtCount}').remove();recalcQtdTotal()">×</button>`;
+  document.getElementById('pe-cores-lista').appendChild(div);
+}
+
+function recalcQtdTotal() {
+  let total = 0;
+  document.querySelectorAll('[id^="cor-qtd-"]').forEach(el => { total += parseInt(el.value)||0; });
+  const qtdEl = document.getElementById('pe-qtd');
+  if (qtdEl) { qtdEl.value = total || 1; calcTotalProdExt(); }
+}
+
+function getCoresProdExt() {
+  const cores = [];
+  document.querySelectorAll('[id^="cor-item-"]').forEach(div => {
+    const id = div.id.replace('cor-item-','');
+    const nome = document.getElementById('cor-nome-'+id)?.value?.trim();
+    const qtd = parseInt(document.getElementById('cor-qtd-'+id)?.value)||0;
+    if (nome && qtd > 0) cores.push({ cor: nome, quantidade: qtd });
+  });
+  return cores;
 }
 
 function calcTotalProdExt() {
@@ -2174,11 +2258,13 @@ async function salvarProdExt() {
   if (!produtora || !tipo) { showToast('Preencha produtora e tipo de caixa', 'error'); return; }
   const qtd = parseInt(document.getElementById('pe-qtd').value)||1;
   const unit = parseFloat(document.getElementById('pe-valor-unit').value)||0;
+  const cores = getCoresProdExt();
+  const corJson = cores.length > 0 ? JSON.stringify(cores) : null;
   const data = {
     empresa_id: empresaId,
     produtora,
     tipo_caixa: tipo,
-    cor: document.getElementById('pe-cor').value || null,
+    cor: corJson,
     logotipo: document.getElementById('pe-logo').value || null,
     quantidade: qtd,
     valor_unitario: unit,
@@ -2207,8 +2293,17 @@ function editarProdExt(id) {
   document.getElementById('prod-ext-modal-title').textContent = 'Editar Entrega';
   document.getElementById('pe-produtora').value = p.produtora;
   document.getElementById('pe-tipo').value = p.tipo_caixa;
-  document.getElementById('pe-cor').value = p.cor || '';
   document.getElementById('pe-logo').value = p.logotipo || '';
+  // Carregar cores
+  document.getElementById('pe-cores-lista').innerHTML = '';
+  coresProdExtCount = 0;
+  try {
+    const cores = p.cor ? JSON.parse(p.cor) : [];
+    cores.forEach(c => addCorProdExt(c.cor, c.quantidade));
+  } catch(e) {
+    if (p.cor) addCorProdExt(p.cor, p.quantidade);
+  }
+  if (coresProdExtCount === 0) addCorProdExt();
   document.getElementById('pe-qtd').value = p.quantidade;
   document.getElementById('pe-valor-unit').value = p.valor_unitario;
   document.getElementById('pe-total').value = fmt(p.valor_total);
@@ -2253,7 +2348,7 @@ function renderExtratoProdExt() {
       <td>${fmtDate(p.data_entrega)}</td>
       <td style="font-weight:500">${p.produtora}</td>
       <td>${p.tipo_caixa}</td>
-      <td>${p.cor||'—'}</td>
+      <td style="font-size:11px">${(() => { try { const cs=JSON.parse(p.cor||''); return Array.isArray(cs)?cs.map(c=>c.quantidade+'x '+c.cor).join(', '):(p.cor||'—'); } catch(e){ return p.cor||'—'; } })()}</td>
       <td style="font-size:11px">${p.logotipo||'—'}</td>
       <td style="font-weight:600">${p.quantidade}</td>
       <td>${fmt(p.valor_unitario)}</td>
@@ -2262,18 +2357,38 @@ function renderExtratoProdExt() {
   }).join('');
   const totalEl = document.getElementById('extrato-prod-total');
   if (totalEl) totalEl.textContent = fmt(totalGeral);
-  // Totais por produtora
+  // Totais por produtora e por cor
   const porProdutora = {};
-  dados.forEach(p => { porProdutora[p.produtora] = (porProdutora[p.produtora]||0) + p.valor_total; });
+  const porCor = {};
+  dados.forEach(p => {
+    porProdutora[p.produtora] = (porProdutora[p.produtora]||0) + p.valor_total;
+    try {
+      const cores = JSON.parse(p.cor||'[]');
+      if (Array.isArray(cores)) {
+        cores.forEach(c => { porCor[c.cor] = (porCor[c.cor]||0) + c.quantidade; });
+      }
+    } catch(e) { if(p.cor) porCor[p.cor] = (porCor[p.cor]||0) + p.quantidade; }
+  });
   const totaisEl = document.getElementById('extrato-prod-ext-totais');
   if (totaisEl) {
+    const coresHtml = Object.keys(porCor).length > 0 ? `
+      <div style="margin-top:12px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--kraft);margin-bottom:8px;font-weight:600">Total por cor</div>
+        ${Object.entries(porCor).map(([cor, qtd]) => `
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:13px">
+            <span style="color:var(--brown)">🎨 ${cor}</span>
+            <span style="font-weight:600">${qtd} unidades</span>
+          </div>`).join('')}
+      </div>` : '';
     totaisEl.innerHTML = `<div style="background:var(--cream);border-radius:10px;padding:14px 16px;border:1px solid var(--tan)">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--kraft);margin-bottom:8px;font-weight:600">Total por produtora</div>
       ${Object.entries(porProdutora).map(([nome, val]) => `
         <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
           <span style="color:var(--kraft)">${nome}</span>
           <span style="font-weight:600">${fmt(val)}</span>
         </div>`).join('')}
-      <div style="background:var(--dark);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      ${coresHtml}
+      <div style="background:var(--dark);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:12px">
         <span style="color:rgba(245,240,232,.65);font-size:12px">TOTAL GERAL</span>
         <span style="color:white;font-family:'DM Serif Display',serif;font-size:20px">${fmt(totalGeral)}</span>
       </div>
