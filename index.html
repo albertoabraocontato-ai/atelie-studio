@@ -1129,8 +1129,8 @@ function renderAgenda() {
   const hoje = new Date().toISOString().split('T')[0];
   tb.innerHTML = allEntregas.map(e => {
     const atrasado = e.status==='pendente' && e.data_prevista < hoje;
-    const sc = atrasado ? 's-atras' : (e.status==='entregue' ? 's-entregue' : 's-pend');
-    const sl = atrasado ? 'Atrasado' : (e.status==='entregue' ? 'Entregue' : 'Pendente');
+    const sc = e.status==='entregue' ? 's-entregue' : (atrasado ? 's-atras' : 's-pend');
+    const sl = e.status==='entregue' ? 'Entregue' : (atrasado ? 'Atrasado' : 'Pendente');
     return `<tr>
       <td style="${atrasado?'color:var(--r);font-weight:600':''}">${fmtDate(e.data_prevista)}${atrasado?' ⚠':''}</td>
       <td style="color:var(--terra);font-weight:600">#${String(e.pedidos?.numero||0).padStart(4,'0')}</td>
@@ -1290,11 +1290,12 @@ function addEntregaForm() {
   entregaFormCount++;
   const div = document.createElement('div');
   div.id = 'ent-form-'+entregaFormCount;
-  div.style.cssText = 'display:grid;grid-template-columns:2fr 80px 1fr auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;background:var(--cream);border-radius:8px;border:1px solid var(--tan)';
+  div.style.cssText = 'display:grid;grid-template-columns:2fr 80px 1fr 120px auto;gap:10px;align-items:end;margin-bottom:10px;padding:12px;background:var(--cream);border-radius:8px;border:1px solid var(--tan)';
   div.innerHTML = `
     <div class="form-group" style="margin:0"><label class="form-label">Modelo</label><input type="text" class="form-input" id="ent-modelo-${entregaFormCount}" placeholder="Ex: Maleta Alta"></div>
     <div class="form-group" style="margin:0"><label class="form-label">Quantidade</label><input type="number" class="form-input" id="ent-qtd-${entregaFormCount}" placeholder="0" style="width:80px"></div>
-    <div class="form-group" style="margin:0"><label class="form-label">Data prevista</label><input type="date" class="form-input" id="ent-data-${entregaFormCount}"></div>
+    <div class="form-group" style="margin:0"><label class="form-label">Data</label><input type="date" class="form-input" id="ent-data-${entregaFormCount}"></div>
+    <div class="form-group" style="margin:0"><label class="form-label">Status</label><select class="form-select" id="ent-status-${entregaFormCount}"><option value="entregue">Entregue</option><option value="pendente">Pendente</option></select></div>
     <button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">×</button>`;
   document.getElementById('entregas-form-list').appendChild(div);
 }
@@ -1362,12 +1363,14 @@ async function salvarPedido() {
       if (!qtdE || !dataE) continue;
       const divE = document.getElementById('ent-form-'+i);
       const entregaId = divE?.getAttribute('data-entrega-id');
+      const statusE = document.getElementById('ent-status-'+i)?.value || 'pendente';
+      const dataRealE = statusE === 'entregue' ? dataE : null;
       if (entregaId) {
         // Atualizar entrega existente
-        await sb.from('entregas').update({ quantidade: qtdE, data_prevista: dataE, modelo: modeloE||null }).eq('id', entregaId);
+        await sb.from('entregas').update({ quantidade: qtdE, data_prevista: dataE, modelo: modeloE||null, status: statusE, data_realizada: dataRealE }).eq('id', entregaId);
       } else {
         // Nova entrega
-        await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE, modelo: modeloE||null });
+        await sb.from('entregas').insert({ empresa_id: empresaId, pedido_id: pedidoId, quantidade: qtdE, data_prevista: dataE, modelo: modeloE||null, status: statusE, data_realizada: dataRealE });
       }
     }
     showToast(editPedidoId ? 'Pedido atualizado!' : 'Pedido criado com sucesso!', 'success');
@@ -1471,7 +1474,8 @@ async function editarPedido(id) {
     div.innerHTML = `
       <div class="form-group" style="margin:0"><label class="form-label">Modelo</label><input type="text" class="form-input" id="ent-modelo-${entregaFormCount}" value="${(e.modelo||'').replace(/"/g,'&quot;')}" placeholder="Ex: Maleta Alta"></div>
       <div class="form-group" style="margin:0"><label class="form-label">Quantidade</label><input type="number" class="form-input" id="ent-qtd-${entregaFormCount}" value="${e.quantidade}" placeholder="0" style="width:80px"></div>
-      <div class="form-group" style="margin:0"><label class="form-label">Data prevista</label><input type="date" class="form-input" id="ent-data-${entregaFormCount}" value="${e.data_prevista||''}"></div>
+      <div class="form-group" style="margin:0"><label class="form-label">Data</label><input type="date" class="form-input" id="ent-data-${entregaFormCount}" value="${e.data_prevista||''}"></div>
+      <div class="form-group" style="margin:0"><label class="form-label">Status</label><select class="form-select" id="ent-status-${entregaFormCount}"><option value="entregue" ${e.status==='entregue'?'selected':''}>Entregue</option><option value="pendente" ${e.status==='pendente'||e.status==='atrasado'?'selected':''}>Pendente</option></select></div>
       <button class="btn btn-danger btn-sm" onclick="excluirEntregaForm('${e.id}','ent-form-${entregaFormCount}')">🗑️</button>`;
     document.getElementById('entregas-form-list').appendChild(div);
   });
@@ -1868,40 +1872,58 @@ async function gerarPDFExtrato() {
   let pedidosCliente = allPedidos.filter(p => p.cliente_id === extratoClienteId);
   if (dataInicio) pedidosCliente = pedidosCliente.filter(p => p.data_pedido >= dataInicio);
   if (dataFim) pedidosCliente = pedidosCliente.filter(p => p.data_pedido <= dataFim);
+
   const doc = new jsPDF();
+  const PAGE_H = 297;
+  const MARGIN_BOTTOM = 40; // espaço reservado para totais na última página
   let y = 0;
+  let paginaAtual = 1;
 
-  // Cabeçalho escuro
-  doc.setFillColor(61,43,26); doc.rect(0,0,210,30,'F');
-  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
-  doc.text('Atelie Studio',20,12);
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(196,168,130);
-  doc.text('Extrato de Pedidos do Cliente',20,20);
-  if (dataInicio || dataFim) {
-    doc.setFontSize(8);
-    doc.text(`Periodo: ${dataInicio ? fmtDate(dataInicio) : 'inicio'} ate ${dataFim ? fmtDate(dataFim) : 'hoje'}`, 20, 27);
+  // Função para desenhar cabeçalho de página
+  function desenharCabecalho(primeiraPagina) {
+    if (primeiraPagina) {
+      doc.setFillColor(61,43,26); doc.rect(0,0,210,30,'F');
+      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+      doc.text('Atelie Studio',20,12);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(196,168,130);
+      doc.text('Extrato de Pedidos do Cliente',20,20);
+      if (dataInicio || dataFim) {
+        doc.setFontSize(8);
+        doc.text(`Periodo: ${dataInicio ? fmtDate(dataInicio) : 'inicio'} ate ${dataFim ? fmtDate(dataFim) : 'hoje'}`, 20, 27);
+      }
+      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      doc.text(new Date().toLocaleDateString('pt-BR'),190,12,{align:'right'});
+
+      y = 38;
+      doc.setFillColor(245,240,232); doc.rect(15,y-5,180,22,'F');
+      doc.setTextColor(0); doc.setFont('helvetica','bold'); doc.setFontSize(12);
+      doc.text(cliente.razao_social,20,y+3);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(139,111,71);
+      const info = [cliente.cnpj,cliente.responsavel,cliente.telefone].filter(Boolean).join('  ·  ');
+      if(info) doc.text(info,20,y+11);
+      y = 68;
+    } else {
+      // Cabeçalho compacto para páginas seguintes
+      doc.setFillColor(61,43,26); doc.rect(0,0,210,14,'F');
+      doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      doc.text('Atelie Studio — Extrato: '+cliente.razao_social.substring(0,35),15,9);
+      doc.setFontSize(8); doc.setTextColor(196,168,130);
+      doc.text(`Pag. ${paginaAtual}`,195,9,{align:'right'});
+      y = 22;
+    }
+    // Header da tabela
+    doc.setFillColor(61,43,26); doc.rect(15,y-5,180,10,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8);
+    doc.text('PEDIDO',18,y+1); doc.text('ITENS',40,y+1); doc.text('DATA',105,y+1);
+    doc.text('ENTREGA',125,y+1); doc.text('VALOR',152,y+1); doc.text('SALDO',175,y+1);
+    y += 8;
   }
-  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(10);
-  doc.text(new Date().toLocaleDateString('pt-BR'),190,12,{align:'right'});
 
-  y = 38;
-  doc.setFillColor(245,240,232); doc.rect(15,y-5,180,22,'F');
-  doc.setTextColor(0); doc.setFont('helvetica','bold'); doc.setFontSize(12);
-  doc.text(cliente.razao_social,20,y+3);
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(139,111,71);
-  const info = [cliente.cnpj,cliente.responsavel,cliente.telefone].filter(Boolean).join('  ·  ');
-  if(info) doc.text(info,20,y+11);
-
-  y = 68;
-  doc.setFillColor(61,43,26); doc.rect(15,y-5,180,10,'F');
-  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8);
-  doc.text('PEDIDO',18,y+1); doc.text('ITENS',40,y+1); doc.text('DATA',105,y+1);
-  doc.text('ENTREGA',125,y+1); doc.text('VALOR',152,y+1); doc.text('SALDO',175,y+1);
-  y += 8;
+  desenharCabecalho(true);
 
   let totFat=0, totRec=0;
-  for(let idx=0;idx<pedidosCliente.length;idx++){
-    const p = pedidosCliente[idx];
+  for(let i=0;i<pedidosCliente.length;i++){
+    const p = pedidosCliente[i];
     const f = p.financeiro_pedido?.[0];
     const totalItens = (p.itens_pedido||[]).reduce((s,it)=>s+(it.valor_total||(it.quantidade*it.valor_unitario)||0),0);
     const valor = (f?.valor_total&&f.valor_total>0)?f.valor_total:totalItens;
@@ -1912,7 +1934,16 @@ async function gerarPDFExtrato() {
     const {data:itens} = await sb.from('itens_pedido').select('modelo,quantidade').eq('pedido_id',p.id);
     const resumo = (itens||[]).map(it=>`${it.quantidade}x ${it.modelo}`).join(', ').substring(0,40)||'—';
 
-    if(idx%2===0){doc.setFillColor(252,249,245);doc.rect(15,y-4,180,9,'F');}
+    // Verificar se precisa de nova página (deixar espaço pros totais)
+    const isUltimo = i === pedidosCliente.length - 1;
+    const limiteY = isUltimo ? PAGE_H - MARGIN_BOTTOM : PAGE_H - 15;
+    if (y > limiteY) {
+      paginaAtual++;
+      doc.addPage();
+      desenharCabecalho(false);
+    }
+
+    if(i%2===0){doc.setFillColor(252,249,245);doc.rect(15,y-4,180,9,'F');}
     doc.setTextColor(196,82,42); doc.setFont('helvetica','bold'); doc.setFontSize(8);
     doc.text(`#${String(p.numero).padStart(4,'0')}`,18,y+1);
     doc.setTextColor(0); doc.setFont('helvetica','normal');
@@ -1924,8 +1955,10 @@ async function gerarPDFExtrato() {
     if(saldo>0)doc.setTextColor(196,82,42);else doc.setTextColor(45,90,39);
     doc.text(fmt(saldo),175,y+1);
     doc.setTextColor(0); y+=9;
-    if(y>265){doc.addPage();y=20;}
   }
+
+  // Totais — se não couber na página atual, nova página
+  if (y > PAGE_H - 38) { doc.addPage(); y = 20; }
 
   y+=5;
   doc.setLineWidth(0.5);doc.setDrawColor(200,180,160);doc.line(15,y,195,y);y+=8;
@@ -1938,8 +1971,13 @@ async function gerarPDFExtrato() {
   doc.text('SALDO TOTAL PENDENTE',20,y+4);
   doc.setTextColor(255);doc.setFont('helvetica','bold');doc.setFontSize(13);
   doc.text(fmt(totFat-totRec),193,y+4,{align:'right'});
-  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(150);
-  doc.text('Atelie Studio · Sistema de Gestao',105,285,{align:'center'});
+  // Rodapé
+  const totalPags = doc.getNumberOfPages();
+  for(let pg=1;pg<=totalPags;pg++){
+    doc.setPage(pg);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(150);
+    doc.text(`Atelie Studio · Sistema de Gestao · Pagina ${pg} de ${totalPags}`,105,290,{align:'center'});
+  }
 
   doc.save(`extrato-${cliente.razao_social.replace(/[^a-z0-9]/gi,'_').toLowerCase()}.pdf`);
   showToast('Extrato gerado!','success');
