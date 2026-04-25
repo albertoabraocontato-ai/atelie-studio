@@ -402,6 +402,9 @@ textarea.form-input{resize:vertical;min-height:60px}
                   <option value="orcamento">Orçamento</option>
                   <option value="aguardando_entrada">Aguardando entrada</option>
                   <option value="em_producao">Em produção</option>
+                  <option value="entrega_parcial">Entrega parcial</option>
+                  <option value="finalizado">Finalizado</option>
+                  <option value="cancelado">Cancelado</option>
                 </select>
               </div>
               <div class="form-group"><label class="form-label">Data do pedido *</label><input type="date" class="form-input" id="p-data"></div>
@@ -1329,7 +1332,10 @@ async function salvarPedido() {
   const taxaCartao = taxaCartaoVisible > 0 ? taxaCartaoVisible : taxaCartaoHidden;
   const valorTaxaCartao = taxaCartao > 0 ? totalVal * (taxaCartao/100) : 0;
   const totalValComTaxa = Math.round((totalVal + valorTaxaCartao) * 100) / 100;
-  const pedidoData = { empresa_id: empresaId, cliente_id: clienteId, data_pedido: document.getElementById('p-data').value, prazo_entrega: document.getElementById('p-prazo').value || null, status: document.getElementById('p-status').value, observacoes: document.getElementById('p-obs').value };
+  const statusValidos = ['orcamento','aguardando_entrada','em_producao','entrega_parcial','finalizado','cancelado'];
+  const statusSelecionado = document.getElementById('p-status').value;
+  const statusFinal = statusValidos.includes(statusSelecionado) ? statusSelecionado : 'em_producao';
+  const pedidoData = { empresa_id: empresaId, cliente_id: clienteId, data_pedido: document.getElementById('p-data').value, prazo_entrega: document.getElementById('p-prazo').value || null, status: statusFinal, observacoes: document.getElementById('p-obs').value };
   const btnSalvar = document.getElementById('btn-salvar-pedido');
   btnSalvar.textContent = 'Salvando...'; btnSalvar.disabled = true;
   try {
@@ -1378,7 +1384,8 @@ async function salvarPedido() {
     setTimeout(() => { window.location.reload(); }, 1000);
   } catch(e) {
     console.error('Erro ao salvar pedido:', e);
-    showToast('Erro: ' + e.message, 'error');
+    console.error('Detalhes:', JSON.stringify(e));
+    showToast('Erro: ' + (e.message || JSON.stringify(e)), 'error');
   } finally {
     btnSalvar.textContent = 'Salvar pedido'; btnSalvar.disabled = false;
   }
@@ -1610,7 +1617,15 @@ async function salvarStatusEntrega() {
   let novoStatus = null;
   if (allEntregues) novoStatus = 'finalizado';
   else if (algumEntregue) novoStatus = 'entrega_parcial';
-  if (novoStatus) await sb.from('pedidos').update({ status: novoStatus }).eq('id', pedidoId);
+  // Só atualiza se tiver um status válido para mudar
+  if (novoStatus) {
+    const pedAtual = allPedidos.find(p=>p.id===pedidoId);
+    const statusAtual = pedAtual?.status;
+    // Não rebaixa pedido já finalizado ou cancelado
+    if (statusAtual !== 'cancelado' && statusAtual !== 'finalizado') {
+      await sb.from('pedidos').update({ status: novoStatus }).eq('id', pedidoId);
+    }
+  }
   showToast('Entrega atualizada!', 'success');
   closeModal('entrega-status-modal');
   await loadAll();
